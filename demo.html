@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TCG Shop — Demo</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;background:#fff;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none;cursor:pointer}
+  button{cursor:pointer;font-family:inherit}
+
+  /* NAV */
+  nav{border-bottom:1px solid #e5e7eb;background:#fff;position:sticky;top:0;z-index:50}
+  .nav-inner{max-width:1120px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:64px}
+  .nav-logo{font-size:1.1rem;font-weight:700;letter-spacing:-.02em}
+  .nav-links{display:flex;align-items:center;gap:2rem}
+  .nav-links a{font-size:.875rem;color:#4b5563}
+  .nav-links a:hover{color:#111}
+  .nav-cart{position:relative;display:flex;align-items:center;gap:.25rem;font-size:.875rem;color:#4b5563}
+  .cart-badge{position:absolute;top:-8px;right:-12px;background:#111;color:#fff;font-size:.65rem;border-radius:999px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-weight:600}
+  .hamburger{display:none;background:none;border:none;padding:4px}
+  .mobile-menu{display:none;border-top:1px solid #e5e7eb;padding:.5rem 1rem}
+  .mobile-menu a{display:block;padding:.5rem .25rem;font-size:.875rem;color:#4b5563;border-radius:4px}
+  .mobile-menu a:hover{background:#f9fafb;color:#111}
+  @media(max-width:640px){.nav-links{display:none}.hamburger{display:block}}
+
+  /* LAYOUT */
+  main{flex:1}
+  footer{border-top:1px solid #e5e7eb;padding:2rem 1rem}
+  .footer-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem}
+  .footer-copy{font-size:.75rem;color:#9ca3af;margin-top:1.5rem;max-width:1120px;margin-left:auto;margin-right:auto}
+
+  /* PAGE CONTAINERS */
+  .page{display:none;max-width:1120px;margin:0 auto;padding:2.5rem 1rem}
+  .page.active{display:block}
+
+  /* HERO */
+  .hero{border-bottom:1px solid #e5e7eb;text-align:center;padding:5rem 1rem}
+  .hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:700;letter-spacing:-.03em;line-height:1.1}
+  .hero p{margin-top:1rem;color:#6b7280;font-size:1rem;max-width:480px;margin-left:auto;margin-right:auto}
+  .hero-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
+  .btn-dark{padding:.75rem 1.5rem;background:#111;color:#fff;font-size:.875rem;font-weight:500;border-radius:6px;border:none}
+  .btn-dark:hover{background:#374151}
+  .btn-outline{padding:.75rem 1.5rem;border:1px solid #d1d5db;color:#374151;font-size:.875rem;font-weight:500;border-radius:6px;background:#fff}
+  .btn-outline:hover{background:#f9fafb}
+
+  /* SECTION */
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+  .section-header h2{font-size:1.125rem;font-weight:600}
+  .section-header a{font-size:.875rem;color:#6b7280;text-decoration:underline}
+  .section-header a:hover{color:#111}
+
+  /* PRODUCT GRID */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem}
+  .card{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+  .card img{width:100%;height:190px;object-fit:cover;display:block}
+  .card-body{padding:1rem;flex:1;display:flex;flex-direction:column}
+  .card-meta{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+  .card-title{font-size:.8125rem;font-weight:500;color:#111;line-height:1.35;flex:1}
+  .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:.75rem}
+  .card-price{font-size:.9375rem;font-weight:600}
+  .card-stock{font-size:.7rem}
+  .stock-ok{color:#16a34a}
+  .stock-no{color:#dc2626}
+  .card-btn{margin-top:.75rem;width:100%;padding:.5rem;font-size:.8125rem;font-weight:500;background:#111;color:#fff;border:none;border-radius:5px}
+  .card-btn:hover{background:#374151}
+  .card-btn:disabled{background:#d1d5db;cursor:not-allowed}
+
+  /* GAME TILES */
+  .game-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
+  .game-tile{border:1px solid;border-radius:8px;padding:1.5rem 1rem;text-align:center;cursor:pointer}
+  .game-tile:hover{box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .game-tile p{font-weight:500;font-size:.9375rem}
+  .game-tile small{font-size:.8rem;color:#6b7280;margin-top:.25rem;display:block}
+  .poke-tile{background:#fef9c3;border-color:#fde68a}
+  .ygo-tile{background:#ede9fe;border-color:#ddd6fe}
+  .mtg-tile{background:#dcfce7;border-color:#bbf7d0}
+
+  /* FILTERS */
+  .filters{display:flex;flex-wrap:wrap;gap:1.5rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid #e5e7eb}
+  .filter-group label{display:block;font-size:.7rem;font-weight:500;color:#6b7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem}
+  .filter-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+  .fbtn{padding:.375rem .75rem;font-size:.8125rem;border-radius:5px;border:1px solid #d1d5db;background:#fff;color:#4b5563}
+  .fbtn:hover{border-color:#6b7280}
+  .fbtn.active{background:#111;color:#fff;border-color:#111}
+  .results-count{font-size:.875rem;color:#6b7280;margin-bottom:1.25rem}
+
+  /* PRODUCT DETAIL */
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
+  @media(max-width:680px){.detail-grid{grid-template-columns:1fr}}
+  .detail-img-wrap{border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;display:flex;align-items:center;justify-content:center;padding:1rem;min-height:320px}
+  .detail-img-wrap img{max-height:340px;width:auto;object-fit:contain}
+  .detail-meta{font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem}
+  .detail-title{font-size:1.5rem;font-weight:700;line-height:1.2;letter-spacing:-.02em}
+  .detail-price{font-size:2rem;font-weight:600;margin-top:1rem}
+  .detail-stock{font-size:.875rem;margin-top:.25rem}
+  .detail-desc{font-size:.875rem;color:#4b5563;line-height:1.6;margin-top:1.25rem}
+  .detail-actions{display:flex;gap:.75rem;margin-top:1.5rem;flex-wrap:wrap}
+  .detail-actions .btn-dark,.detail-actions .btn-outline{flex:1;min-width:120px;text-align:center}
+  .detail-specs{margin-top:2rem;border-top:1px solid #e5e7eb;padding-top:1.5rem}
+  .detail-specs h3{font-size:.875rem;font-weight:600;margin-bottom:.75rem}
+  .spec-row{display:flex;font-size:.875rem;gap:1rem;margin-bottom:.5rem}
+  .spec-label{width:90px;color:#6b7280;flex-shrink:0}
+  .breadcrumb{font-size:.8125rem;color:#6b7280;display:flex;gap:.5rem;margin-bottom:1.5rem}
+  .breadcrumb a:hover{color:#111}
+  .related-section{margin-top:3rem;border-top:1px solid #e5e7eb;padding-top:2rem}
+  .related-section h2{font-size:1rem;font-weight:600;margin-bottom:1.25rem}
+
+  /* CART */
+  .cart-item{display:flex;gap:1rem;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;align-items:flex-start}
+  .cart-item+.cart-item{margin-top:.75rem}
+  .cart-item img{width:56px;height:70px;object-fit:cover;border-radius:4px;border:1px solid #f3f4f6;flex-shrink:0}
+  .cart-item-body{flex:1;min-width:0}
+  .cart-item-name{font-size:.8125rem;font-weight:500;color:#111;line-height:1.35}
+  .cart-item-lang{font-size:.7rem;color:#6b7280;margin-top:2px;text-transform:capitalize}
+  .cart-item-price{font-size:.875rem;font-weight:500;margin-top:.25rem}
+  .qty-controls{display:flex;align-items:center;gap:.5rem;margin-top:.75rem}
+  .qty-btn{width:28px;height:28px;border:1px solid #d1d5db;border-radius:4px;background:#fff;font-size:1rem;display:flex;align-items:center;justify-content:center;line-height:1;color:#374151}
+  .qty-btn:hover{background:#f9fafb}
+  .qty-btn:disabled{opacity:.35;cursor:not-allowed}
+  .qty-val{font-size:.875rem;width:28px;text-align:center}
+  .cart-item-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:.5rem}
+  .remove-btn{background:none;border:none;color:#9ca3af;font-size:1.1rem;line-height:1;padding:2px}
+  .remove-btn:hover{color:#dc2626}
+  .cart-line-total{font-size:.875rem;font-weight:600}
+  .order-summary{margin-top:2rem;border-top:1px solid #e5e7eb;padding-top:1.5rem}
+  .summary-row{display:flex;justify-content:space-between;font-size:.875rem;color:#4b5563;margin-bottom:.5rem}
+  .summary-total{display:flex;justify-content:space-between;font-size:1rem;font-weight:600;border-top:1px solid #e5e7eb;padding-top:1rem;margin-top:.5rem}
+  .cart-actions{display:flex;flex-direction:column;gap:.75rem;margin-top:1.5rem}
+  .empty-state{text-align:center;padding:5rem 1rem}
+  .empty-state svg{color:#d1d5db;margin:0 auto 1rem}
+  .empty-state h1{font-size:1.25rem;font-weight:600}
+  .empty-state p{font-size:.875rem;color:#6b7280;margin-top:.5rem}
+  .empty-state .btn-dark{margin-top:1.5rem;display:inline-block}
+
+  /* CHECKOUT */
+  .checkout-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
+  @media(max-width:720px){.checkout-grid{grid-template-columns:1fr}}
+  fieldset{border:none;margin-bottom:1.5rem}
+  legend{font-size:.875rem;font-weight:600;color:#111;padding-bottom:.75rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:.75rem}
+  legend span{font-size:.75rem;font-weight:400;color:#9ca3af}
+  .form-row{margin-bottom:.75rem}
+  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+  label{display:block;font-size:.75rem;font-weight:500;color:#4b5563;margin-bottom:.25rem}
+  input[type=text],input[type=email]{width:100%;border:1px solid #d1d5db;border-radius:5px;padding:.5rem .75rem;font-size:.875rem;font-family:inherit;outline:none}
+  input[type=text]:focus,input[type=email]:focus{border-color:#6b7280;box-shadow:0 0 0 2px rgba(107,114,128,.15)}
+  input.mono{font-family:'Courier New',monospace}
+  .checkout-summary h2{font-size:.875rem;font-weight:600;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #e5e7eb}
+  .co-item{display:flex;gap:.75rem;font-size:.875rem;margin-bottom:.75rem;align-items:flex-start}
+  .co-item img{width:40px;height:50px;object-fit:cover;border-radius:3px;border:1px solid #f3f4f6;flex-shrink:0}
+  .co-item-name{font-weight:500;line-height:1.3;flex:1}
+  .co-item-sub{font-size:.7rem;color:#6b7280;text-transform:capitalize;margin-top:2px}
+  .co-item-price{font-weight:500;flex-shrink:0}
+  .co-total{display:flex;justify-content:space-between;font-size:.9375rem;font-weight:600;border-top:1px solid #e5e7eb;padding-top:.75rem;margin-top:.5rem}
+  #processing{display:none;text-align:center;padding:3rem 1rem}
+  #processing p{color:#6b7280;font-size:.875rem;margin-top:.75rem}
+
+  /* ORDER CONFIRM */
+  .confirm-wrap{text-align:center;padding:5rem 1rem;max-width:500px;margin:0 auto}
+  .confirm-icon{width:64px;height:64px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#16a34a}
+  .confirm-box{border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;text-align:left;margin:1.5rem 0}
+  .confirm-row{display:flex;justify-content:space-between;font-size:.875rem;padding:.35rem 0}
+  .confirm-row:not(:last-child){border-bottom:1px solid #f3f4f6}
+  .confirm-label{color:#6b7280}
+  .confirm-status{color:#16a34a;font-weight:500}
+  .confirm-note{font-size:.75rem;color:#9ca3af;margin-top:.75rem}
+  .confirm-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
+
+  /* SPINNER */
+  .spinner{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#111;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* TOAST */
+  #toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:#111;color:#fff;font-size:.8125rem;padding:.6rem 1.25rem;border-radius:6px;z-index:999;transition:transform .25s ease;white-space:nowrap;pointer-events:none}
+  #toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" onclick="navigate('home')">TCG Shop</a>
+    <div class="nav-links">
+      <a onclick="navigate('home')">Home</a>
+      <a onclick="navigate('browse')">Browse</a>
+      <a onclick="navigate('cart')" class="nav-cart">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        Cart
+        <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+      </a>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <svg id="menuIcon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a onclick="navigate('home');closeMenu()">Home</a>
+    <a onclick="navigate('browse');closeMenu()">Browse</a>
+    <a onclick="navigate('cart');closeMenu()">Cart <span id="mobileCartCount"></span></a>
+  </div>
+</nav>
+
+<main>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <h1>Trading Card Games</h1>
+    <p>Shop sealed booster boxes and packs for Pokémon, Yu-Gi-Oh!, and Magic: The Gathering. English and Japanese editions.</p>
+    <div class="hero-btns">
+      <button class="btn-dark" onclick="navigate('browse')">Browse All Products</button>
+      <button class="btn-outline" onclick="navigate('browse','pokemon')">Shop Pokémon</button>
+    </div>
+  </div>
+  <div style="max-width:1120px;margin:0 auto;padding:3rem 1rem">
+    <div class="section-header">
+      <h2>Featured Products</h2>
+      <a onclick="navigate('browse')">View all</a>
+    </div>
+    <div class="grid" id="featuredGrid"></div>
+    <div style="margin-top:3rem;border-top:1px solid #e5e7eb;padding-top:2.5rem">
+      <h2 style="font-size:1.125rem;font-weight:600;margin-bottom:1.25rem">Shop by Game</h2>
+      <div class="game-tiles">
+        <div class="game-tile poke-tile" onclick="navigate('browse','pokemon')"><p>Pokémon</p><small>Browse all products →</small></div>
+        <div class="game-tile ygo-tile" onclick="navigate('browse','yugioh')"><p>Yu-Gi-Oh!</p><small>Browse all products →</small></div>
+        <div class="game-tile mtg-tile" onclick="navigate('browse','mtg')"><p>Magic: The Gathering</p><small>Browse all products →</small></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BROWSE -->
+<div id="page-browse" class="page">
+  <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem">Browse Products</h1>
+  <div class="filters">
+    <div class="filter-group">
+      <label>Game</label>
+      <div class="filter-btns" id="tcgFilters">
+        <button class="fbtn active" data-tcg="all">All Games</button>
+        <button class="fbtn" data-tcg="pokemon">Pokémon</button>
+        <button class="fbtn" data-tcg="yugioh">Yu-Gi-Oh!</button>
+        <button class="fbtn" data-tcg="mtg">Magic: The Gathering</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Language</label>
+      <div class="filter-btns" id="langFilters">
+        <button class="fbtn active" data-lang="all">All Languages</button>
+        <button class="fbtn" data-lang="english">English</button>
+        <button class="fbtn" data-lang="japanese">Japanese</button>
+      </div>
+    </div>
+  </div>
+  <p class="results-count" id="resultsCount"></p>
+  <div class="grid" id="browseGrid"></div>
+  <div id="noResults" style="display:none;text-align:center;padding:4rem 0">
+    <p style="color:#6b7280">No products match your filters.</p>
+    <button style="margin-top:.75rem;font-size:.875rem;text-decoration:underline;background:none;border:none;color:#111" onclick="resetFilters()">Clear filters</button>
+  </div>
+</div>
+
+<!-- PRODUCT DETAIL -->
+<div id="page-product" class="page">
+  <div class="breadcrumb">
+    <a onclick="navigate('home')">Home</a><span>/</span>
+    <a onclick="navigate('browse')">Browse</a><span>/</span>
+    <span id="detailBreadcrumb" style="color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px"></span>
+  </div>
+  <div class="detail-grid">
+    <div class="detail-img-wrap"><img id="detailImg" src="" alt=""/></div>
+    <div>
+      <div class="detail-meta" id="detailMeta"></div>
+      <h1 class="detail-title" id="detailTitle"></h1>
+      <p class="detail-price" id="detailPrice"></p>
+      <p class="detail-stock" id="detailStock"></p>
+      <p class="detail-desc" id="detailDesc"></p>
+      <div class="detail-actions">
+        <button class="btn-dark" id="detailAddBtn" onclick="detailAddToCart()">Add to Cart</button>
+        <button class="btn-outline" id="detailViewCartBtn" style="display:none" onclick="navigate('cart')">View Cart</button>
+      </div>
+      <div class="detail-specs">
+        <h3>Product Details</h3>
+        <div id="detailSpecs"></div>
+      </div>
+    </div>
+  </div>
+  <div class="related-section" id="relatedSection">
+    <h2 id="relatedTitle"></h2>
+    <div class="grid" id="relatedGrid"></div>
+  </div>
+</div>
+
+<!-- CART -->
+<div id="page-cart" class="page">
+  <div id="cartContent"></div>
+</div>
+
+<!-- CHECKOUT -->
+<div id="page-checkout" class="page">
+  <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:2rem">Checkout</h1>
+  <div id="processing" class="processing">
+    <div class="spinner"></div>
+    <p>Processing your order…</p>
+  </div>
+  <div id="checkoutForm">
+    <div class="checkout-grid">
+      <form onsubmit="submitOrder(event)">
+        <fieldset>
+          <legend>Contact Information</legend>
+          <div class="form-row"><label>Full Name</label><input type="text" id="co-name" placeholder="Jane Smith" required></div>
+          <div class="form-row"><label>Email</label><input type="email" id="co-email" placeholder="jane@example.com" required></div>
+        </fieldset>
+        <fieldset>
+          <legend>Shipping Address</legend>
+          <div class="form-row"><label>Street Address</label><input type="text" id="co-addr" placeholder="123 Main St" required></div>
+          <div class="form-row-2">
+            <div><label>City</label><input type="text" id="co-city" placeholder="New York" required></div>
+            <div><label>ZIP Code</label><input type="text" id="co-zip" placeholder="10001" required></div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Payment <span>(Demo — no real charges)</span></legend>
+          <div class="form-row"><label>Card Number</label><input type="text" id="co-card" class="mono" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)" required></div>
+          <div class="form-row-2">
+            <div><label>Expiry</label><input type="text" id="co-exp" class="mono" placeholder="MM/YY" maxlength="5" oninput="fmtExpiry(this)" required></div>
+            <div><label>CVV</label><input type="text" id="co-cvv" class="mono" placeholder="123" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" required></div>
+          </div>
+        </fieldset>
+        <button type="submit" class="btn-dark" id="placeOrderBtn" style="width:100%;padding:.875rem"></button>
+      </form>
+      <div class="checkout-summary">
+        <h2>Order Summary</h2>
+        <div id="coItems"></div>
+        <div class="co-total"><span>Total</span><span id="coTotal"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER CONFIRMATION -->
+<div id="page-confirm" class="page">
+  <div class="confirm-wrap">
+    <div class="confirm-icon">
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h1 style="font-size:1.5rem;font-weight:700">Order Placed!</h1>
+    <p style="color:#6b7280;font-size:.875rem;margin-top:.5rem">Thank you for your purchase. Your order has been received.</p>
+    <div class="confirm-box">
+      <div class="confirm-row"><span class="confirm-label">Order number</span><span id="confirmOrderNum" style="font-family:monospace;font-weight:600"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Status</span><span class="confirm-status">Confirmed</span></div>
+      <div class="confirm-row"><span class="confirm-label">Est. delivery</span><span>5–7 business days</span></div>
+    </div>
+    <p class="confirm-note">This is a demo store. No real payment was processed.</p>
+    <div class="confirm-btns">
+      <button class="btn-dark" onclick="navigate('browse')">Continue Shopping</button>
+      <button class="btn-outline" onclick="navigate('home')">Back to Home</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div><p style="font-size:.875rem;font-weight:600">TCG Shop</p><p style="font-size:.75rem;color:#6b7280;margin-top:4px">Your source for trading card games.</p></div>
+    <div style="display:flex;gap:1.5rem">
+      <a onclick="navigate('home')" style="font-size:.75rem;color:#6b7280">Home</a>
+      <a onclick="navigate('browse')" style="font-size:.75rem;color:#6b7280">Browse</a>
+      <a onclick="navigate('cart')" style="font-size:.75rem;color:#6b7280">Cart</a>
+    </div>
+  </div>
+  <p class="footer-copy">© 2026 TCG Shop. All rights reserved. Demo store — no real transactions.</p>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const PRODUCTS = [
+  {id:'poke-sv-base-en',name:'Pokémon Scarlet & Violet Base Set Booster Box',tcg:'pokemon',language:'english',type:'booster-box',price:144.99,stock:15,description:'The Scarlet & Violet Base Set introduces Pokémon ex cards with stunning artwork. Each booster box contains 36 packs, with 10 cards per pack. Features over 190 cards including powerful Pokémon ex and full-art illustrations.',imageUrl:'https://placehold.co/300x400/fef9c3/854d0e?text=Pokemon+SV+Box+EN',featured:true},
+  {id:'poke-sv-base-jp',name:'Pokémon Scarlet & Violet Base Set Booster Box',tcg:'pokemon',language:'japanese',type:'booster-box',price:89.99,stock:20,description:'Japanese edition of the Scarlet & Violet Base Set. 30 packs per box with 7 cards each. Japanese cards often feature different artwork and card numbering, making them highly sought after by collectors.',imageUrl:'https://placehold.co/300x400/fef9c3/854d0e?text=Pokemon+SV+Box+JP',featured:true},
+  {id:'ygo-phantom-nightmare-en',name:'Yu-Gi-Oh! Phantom Nightmare Booster Box',tcg:'yugioh',language:'english',type:'booster-box',price:79.99,stock:10,description:'Phantom Nightmare brings new support for popular archetypes. Each booster box contains 24 packs with 9 cards each. Includes Ultra Rares, Super Rares, and rare Secret Rare pulls.',imageUrl:'https://placehold.co/300x400/ede9fe/4c1d95?text=YGO+Phantom+Box+EN',featured:true},
+  {id:'ygo-phantom-nightmare-jp',name:'Yu-Gi-Oh! Phantom Nightmare Booster Box',tcg:'yugioh',language:'japanese',type:'booster-box',price:64.99,stock:8,description:'Japanese Phantom Nightmare booster box. Japanese Yu-Gi-Oh sets often release months before the international version. 30 packs per box, 7 cards per pack. Chance at quarter-century secret rares.',imageUrl:'https://placehold.co/300x400/ede9fe/4c1d95?text=YGO+Phantom+Box+JP',featured:false},
+  {id:'mtg-karlov-manor-en',name:'MTG Murders at Karlov Manor Draft Booster Box',tcg:'mtg',language:'english',type:'booster-box',price:109.99,stock:12,description:'Solve the mystery in Ravnica with the Murders at Karlov Manor Draft Booster Box. Contains 36 packs, each with 15 cards optimized for draft play. Features the new "Disguise" and "Cloak" mechanics.',imageUrl:'https://placehold.co/300x400/dcfce7/14532d?text=MTG+Karlov+Box+EN',featured:true},
+  {id:'mtg-karlov-manor-jp',name:'MTG Murders at Karlov Manor Draft Booster Box',tcg:'mtg',language:'japanese',type:'booster-box',price:84.99,stock:7,description:'Japanese edition of the Murders at Karlov Manor Draft Booster Box. 36 packs per box with full Japanese card text and distinct foil treatments. Popular with collectors who prefer the Japanese typography.',imageUrl:'https://placehold.co/300x400/dcfce7/14532d?text=MTG+Karlov+Box+JP',featured:false},
+  {id:'poke-twilight-masquerade-en',name:'Pokémon Twilight Masquerade Booster Pack',tcg:'pokemon',language:'english',type:'booster-pack',price:4.99,stock:100,description:'Single booster pack from the Twilight Masquerade set. Contains 10 cards with a chance to pull ex Pokémon, full-art trainers, and hyper rares. Features Ogerpon and other Kitakami Pokémon.',imageUrl:'https://placehold.co/300x400/fef9c3/854d0e?text=Pokemon+TM+Pack+EN',featured:false},
+  {id:'poke-twilight-masquerade-jp',name:'Pokémon Twilight Masquerade Booster Pack',tcg:'pokemon',language:'japanese',type:'booster-pack',price:3.49,stock:150,description:'Japanese single booster pack from the Twilight Masquerade set. 7 cards per pack with higher pull rates for rare cards compared to the English version.',imageUrl:'https://placehold.co/300x400/fef9c3/854d0e?text=Pokemon+TM+Pack+JP',featured:false},
+  {id:'ygo-legacy-destruction-en',name:'Yu-Gi-Oh! Legacy of Destruction Booster Pack',tcg:'yugioh',language:'english',type:'booster-pack',price:3.99,stock:80,description:'Single pack from the Legacy of Destruction set. 9 cards per pack with new support for Dragon, Fiend, and Warrior archetypes. Chance at Ultra Rares and Secret Rares.',imageUrl:'https://placehold.co/300x400/ede9fe/4c1d95?text=YGO+LEDE+Pack+EN',featured:false},
+  {id:'ygo-legacy-destruction-jp',name:'Yu-Gi-Oh! Legacy of Destruction Booster Pack',tcg:'yugioh',language:'japanese',type:'booster-pack',price:3.49,stock:90,description:'Japanese single booster pack from Legacy of Destruction. 7 cards per pack. Japanese packs are pristine, making them popular with collectors chasing quarter-century secret rares.',imageUrl:'https://placehold.co/300x400/ede9fe/4c1d95?text=YGO+LEDE+Pack+JP',featured:false},
+  {id:'mtg-thunder-junction-pack-en',name:'MTG Outlaws of Thunder Junction Play Booster Pack',tcg:'mtg',language:'english',type:'booster-pack',price:4.99,stock:120,description:'Single Play Booster Pack from Outlaws of Thunder Junction. 14 cards per pack. Guaranteed rare or mythic rare, plus a chance at The Big Score bonus cards.',imageUrl:'https://placehold.co/300x400/dcfce7/14532d?text=MTG+OTJ+Pack+EN',featured:false},
+  {id:'mtg-thunder-junction-pack-jp',name:'MTG Outlaws of Thunder Junction Play Booster Pack',tcg:'mtg',language:'japanese',type:'booster-pack',price:3.99,stock:60,description:'Japanese edition Play Booster Pack from Outlaws of Thunder Junction. Features Japanese card art and text. Popular with collectors who appreciate the distinct Japanese card frame.',imageUrl:'https://placehold.co/300x400/dcfce7/14532d?text=MTG+OTJ+Pack+JP',featured:false},
+];
+
+const TCG_LABELS = {pokemon:'Pokémon',yugioh:'Yu-Gi-Oh!',mtg:'Magic: The Gathering'};
+const TYPE_LABELS = {'booster-box':'Booster Box','booster-pack':'Booster Pack','single-card':'Single Card','sealed-product':'Sealed Product'};
+
+// ─── CART ────────────────────────────────────────────────────────────────────
+let cart = JSON.parse(localStorage.getItem('tcg-demo-cart')||'[]');
+
+function saveCart(){localStorage.setItem('tcg-demo-cart',JSON.stringify(cart));}
+function cartTotal(){return cart.reduce((s,i)=>{const p=PRODUCTS.find(x=>x.id===i.id);return s+(p?p.price*i.qty:0);},0);}
+function cartItemCount(){return cart.reduce((s,i)=>s+i.qty,0);}
+
+function updateBadge(){
+  const n=cartItemCount();
+  const b=document.getElementById('cartBadge');
+  const m=document.getElementById('mobileCartCount');
+  if(n>0){b.style.display='flex';b.textContent=n>99?'99+':n;}
+  else{b.style.display='none';}
+  if(m) m.textContent=n>0?`(${n})`:'';
+}
+
+function addToCart(id,maxStock){
+  const existing=cart.find(i=>i.id===id);
+  if(existing){
+    if(existing.qty<maxStock) existing.qty++;
+    else{toast('Max stock reached');return;}
+  } else {
+    cart.push({id,qty:1});
+  }
+  saveCart();updateBadge();
+  toast('Added to cart ✓');
+}
+
+function removeFromCart(id){cart=cart.filter(i=>i.id!==id);saveCart();updateBadge();renderCart();}
+
+function updateQty(id,delta){
+  const item=cart.find(i=>i.id===id);
+  const p=PRODUCTS.find(x=>x.id===id);
+  if(!item||!p) return;
+  const newQty=item.qty+delta;
+  if(newQty<=0){removeFromCart(id);return;}
+  if(newQty>p.stock){toast('Max stock reached');return;}
+  item.qty=newQty;
+  saveCart();updateBadge();renderCart();
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+let currentPage='home';
+let currentProductId=null;
+
+function navigate(page,arg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  if(page==='product'&&arg){
+    currentProductId=arg;
+    renderProductDetail(arg);
+  }
+  if(page==='browse'){
+    renderBrowse();
+    if(arg) setTcgFilter(arg);
+  }
+  if(page==='cart') renderCart();
+  if(page==='checkout') renderCheckout();
+  currentPage=page;
+  const el=document.getElementById(`page-${page}`);
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ─── NAVBAR ──────────────────────────────────────────────────────────────────
+function toggleMenu(){
+  const m=document.getElementById('mobileMenu');
+  const open=m.style.display==='block';
+  m.style.display=open?'none':'block';
+}
+function closeMenu(){document.getElementById('mobileMenu').style.display='none';}
+
+// ─── CARD HTML ───────────────────────────────────────────────────────────────
+function cardHTML(p){
+  return `<div class="card">
+    <img src="${p.imageUrl}" alt="${p.name}" loading="lazy" onclick="navigate('product','${p.id}')" style="cursor:pointer"/>
+    <div class="card-body">
+      <div class="card-meta"><span>${TCG_LABELS[p.tcg]}</span><span>·</span><span>${p.language}</span></div>
+      <p class="card-title" style="cursor:pointer" onclick="navigate('product','${p.id}')">${p.name}</p>
+      <div class="card-footer">
+        <span class="card-price">$${p.price.toFixed(2)}</span>
+        <span class="card-stock ${p.stock>0?'stock-ok':'stock-no'}">${p.stock>0?`${p.stock} in stock`:'Out of stock'}</span>
+      </div>
+      <button class="card-btn" ${p.stock===0?'disabled':''} onclick="addToCart('${p.id}',${p.stock})">${p.stock===0?'Out of Stock':'Add to Cart'}</button>
+    </div>
+  </div>`;
+}
+
+// ─── HOME ────────────────────────────────────────────────────────────────────
+function renderHome(){
+  const featured=PRODUCTS.filter(p=>p.featured);
+  document.getElementById('featuredGrid').innerHTML=featured.map(cardHTML).join('');
+}
+
+// ─── BROWSE ──────────────────────────────────────────────────────────────────
+let activeTcg='all', activeLang='all';
+
+function renderBrowse(){
+  const filtered=PRODUCTS.filter(p=>{
+    return (activeTcg==='all'||p.tcg===activeTcg)&&(activeLang==='all'||p.language===activeLang);
+  });
+  document.getElementById('resultsCount').textContent=`${filtered.length} ${filtered.length===1?'product':'products'}`;
+  document.getElementById('browseGrid').innerHTML=filtered.map(cardHTML).join('');
+  document.getElementById('noResults').style.display=filtered.length===0?'block':'none';
+  document.getElementById('browseGrid').style.display=filtered.length===0?'none':'grid';
+}
+
+function setTcgFilter(val){
+  activeTcg=val;
+  document.querySelectorAll('#tcgFilters .fbtn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.tcg===val);
+  });
+  renderBrowse();
+}
+
+function setLangFilter(val){
+  activeLang=val;
+  document.querySelectorAll('#langFilters .fbtn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.lang===val);
+  });
+  renderBrowse();
+}
+
+function resetFilters(){activeTcg='all';activeLang='all';setTcgFilter('all');setLangFilter('all');}
+
+document.querySelectorAll('#tcgFilters .fbtn').forEach(b=>b.addEventListener('click',()=>setTcgFilter(b.dataset.tcg)));
+document.querySelectorAll('#langFilters .fbtn').forEach(b=>b.addEventListener('click',()=>setLangFilter(b.dataset.lang)));
+
+// ─── PRODUCT DETAIL ──────────────────────────────────────────────────────────
+function renderProductDetail(id){
+  const p=PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('detailBreadcrumb').textContent=p.name;
+  document.getElementById('detailImg').src=p.imageUrl;
+  document.getElementById('detailImg').alt=p.name;
+  document.getElementById('detailMeta').innerHTML=`<span>${TCG_LABELS[p.tcg]}</span><span>·</span><span>${p.language}</span><span>·</span><span>${TYPE_LABELS[p.type]||p.type}</span>`;
+  document.getElementById('detailTitle').textContent=p.name;
+  document.getElementById('detailPrice').textContent=`$${p.price.toFixed(2)}`;
+  const stockEl=document.getElementById('detailStock');
+  stockEl.textContent=p.stock>0?`${p.stock} in stock`:'Out of stock';
+  stockEl.style.color=p.stock>0?'#16a34a':'#dc2626';
+  document.getElementById('detailDesc').textContent=p.description;
+  const addBtn=document.getElementById('detailAddBtn');
+  addBtn.disabled=p.stock===0;
+  addBtn.textContent=p.stock===0?'Out of Stock':'Add to Cart';
+  document.getElementById('detailSpecs').innerHTML=
+    `<div class="spec-row"><span class="spec-label">Game</span><span>${TCG_LABELS[p.tcg]}</span></div>`+
+    `<div class="spec-row"><span class="spec-label">Language</span><span>${p.language.charAt(0).toUpperCase()+p.language.slice(1)}</span></div>`+
+    `<div class="spec-row"><span class="spec-label">Type</span><span>${TYPE_LABELS[p.type]||p.type}</span></div>`;
+  const cartItem=cart.find(i=>i.id===p.id);
+  const vcBtn=document.getElementById('detailViewCartBtn');
+  vcBtn.style.display=cartItem?'block':'none';
+  vcBtn.textContent=cartItem?`View Cart (${cartItem.qty} in cart)`:'View Cart';
+  // Related
+  const related=PRODUCTS.filter(x=>x.tcg===p.tcg&&x.id!==p.id).slice(0,4);
+  document.getElementById('relatedTitle').textContent=`More ${TCG_LABELS[p.tcg]} Products`;
+  document.getElementById('relatedGrid').innerHTML=related.map(cardHTML).join('');
+  document.getElementById('relatedSection').style.display=related.length?'block':'none';
+}
+
+function detailAddToCart(){
+  if(!currentProductId) return;
+  const p=PRODUCTS.find(x=>x.id===currentProductId);
+  if(!p) return;
+  addToCart(p.id,p.stock);
+  const vcBtn=document.getElementById('detailViewCartBtn');
+  const item=cart.find(i=>i.id===p.id);
+  vcBtn.style.display='block';
+  vcBtn.textContent=`View Cart (${item?item.qty:1} in cart)`;
+}
+
+// ─── CART ────────────────────────────────────────────────────────────────────
+function renderCart(){
+  const el=document.getElementById('cartContent');
+  if(cart.length===0){
+    el.innerHTML=`<div class="empty-state">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      <h1>Your cart is empty</h1>
+      <p>Add some products to get started.</p>
+      <button class="btn-dark" onclick="navigate('browse')">Browse Products</button>
+    </div>`;
+    return;
+  }
+  const total=cartTotal();
+  let itemsHTML=cart.map(item=>{
+    const p=PRODUCTS.find(x=>x.id===item.id);
+    if(!p) return '';
+    return `<div class="cart-item">
+      <img src="${p.imageUrl}" alt="${p.name}" onclick="navigate('product','${p.id}')" style="cursor:pointer"/>
+      <div class="cart-item-body">
+        <p class="cart-item-name" onclick="navigate('product','${p.id}')" style="cursor:pointer">${p.name}</p>
+        <p class="cart-item-lang">${p.language}</p>
+        <p class="cart-item-price">$${p.price.toFixed(2)}</p>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="updateQty('${p.id}',-1)">−</button>
+          <span class="qty-val">${item.qty}</span>
+          <button class="qty-btn" onclick="updateQty('${p.id}',1)" ${item.qty>=p.stock?'disabled':''}>+</button>
+        </div>
+      </div>
+      <div class="cart-item-right">
+        <button class="remove-btn" onclick="removeFromCart('${p.id}')" title="Remove">✕</button>
+        <span class="cart-line-total">$${(p.price*item.qty).toFixed(2)}</span>
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`${itemsHTML}
+    <div class="order-summary">
+      <div class="summary-row"><span>Subtotal</span><span>$${total.toFixed(2)}</span></div>
+      <div class="summary-row"><span>Shipping</span><span style="color:#6b7280">Calculated at checkout</span></div>
+      <div class="summary-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
+    </div>
+    <div class="cart-actions">
+      <button class="btn-dark" onclick="navigate('checkout')">Proceed to Checkout</button>
+      <button class="btn-outline" onclick="navigate('browse')">Continue Shopping</button>
+    </div>`;
+}
+
+// ─── CHECKOUT ────────────────────────────────────────────────────────────────
+function renderCheckout(){
+  if(cart.length===0){navigate('browse');return;}
+  document.getElementById('checkoutForm').style.display='block';
+  document.getElementById('processing').style.display='none';
+  const total=cartTotal();
+  document.getElementById('placeOrderBtn').textContent=`Place Order — $${total.toFixed(2)}`;
+  document.getElementById('coTotal').textContent=`$${total.toFixed(2)}`;
+  document.getElementById('coItems').innerHTML=cart.map(item=>{
+    const p=PRODUCTS.find(x=>x.id===item.id);
+    if(!p) return '';
+    return `<div class="co-item">
+      <img src="${p.imageUrl}" alt="${p.name}"/>
+      <div style="flex:1"><p class="co-item-name">${p.name}</p><p class="co-item-sub">${p.language} · qty ${item.qty}</p></div>
+      <span class="co-item-price">$${(p.price*item.qty).toFixed(2)}</span>
+    </div>`;
+  }).join('');
+}
+
+function fmtCard(el){el.value=el.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();}
+
+function fmtExpiry(el){
+  const d=el.value.replace(/\D/g,'').slice(0,4);
+  el.value=d.length<=2?d:`${d.slice(0,2)}/${d.slice(2)}`;
+}
+
+async function submitOrder(e){
+  e.preventDefault();
+  document.getElementById('checkoutForm').style.display='none';
+  document.getElementById('processing').style.display='block';
+  await new Promise(r=>setTimeout(r,1200));
+  const orderNum=`TCG-${Date.now().toString().slice(-8)}`;
+  cart=[];saveCart();updateBadge();
+  document.getElementById('confirmOrderNum').textContent=orderNum;
+  navigate('confirm');
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+renderHome();
+renderBrowse();
+updateBadge();
+</script>
+</body>
+</html>
