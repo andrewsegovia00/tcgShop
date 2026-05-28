@@ -5,7 +5,11 @@ import { useCart } from '@/components/CartContext';
 import { products } from '@/data/products';
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, totalPrice } = useCart();
+  const { items, removeItem, updateQuantity, totalPrice, cartHydrated } = useCart();
+
+  if (!cartHydrated) {
+    return <div className="max-w-2xl mx-auto px-4 py-20 text-center text-sm text-gray-400">Loading cart…</div>;
+  }
 
   if (items.length === 0) {
     return (

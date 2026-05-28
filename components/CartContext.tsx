@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { CartItem, CartContextType, Product } from '@/types';
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -9,28 +9,34 @@ const CART_STORAGE_KEY = 'tcg-shop-cart';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [cartHydrated, setCartHydrated] = useState(false);
+  // Prevent write effect from firing before the read effect has run
+  const hydrated = useRef(false);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
-      if (stored) {
-        setItems(JSON.parse(stored));
-      }
+      if (stored) setItems(JSON.parse(stored));
     } catch {
       // ignore parse errors
     }
+    hydrated.current = true;
+    setCartHydrated(true);
   }, []);
 
   useEffect(() => {
+    if (!hydrated.current) return;
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  function addItem(productId: string) {
+  function addItem(productId: string, maxStock?: number) {
     setItems((prev) => {
       const existing = prev.find((i) => i.productId === productId);
       if (existing) {
+        const newQty = existing.quantity + 1;
+        if (maxStock !== undefined && newQty > maxStock) return prev;
         return prev.map((i) =>
-          i.productId === productId ? { ...i, quantity: i.quantity + 1 } : i
+          i.productId === productId ? { ...i, quantity: newQty } : i
         );
       }
       return [...prev, { productId, quantity: 1 }];
@@ -66,7 +72,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice }}
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice, cartHydrated }}
     >
       {children}
     </CartContext.Provider>

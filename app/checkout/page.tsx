@@ -18,7 +18,7 @@ interface FormData {
 }
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, totalPrice, clearCart, cartHydrated } = useCart();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<FormData>({
@@ -31,6 +31,10 @@ export default function CheckoutPage() {
     expiry: '',
     cvv: '',
   });
+
+  if (!cartHydrated) {
+    return <div className="max-w-2xl mx-auto px-4 py-20 text-center text-sm text-gray-400">Loading…</div>;
+  }
 
   if (items.length === 0) {
     return (
@@ -59,19 +63,24 @@ export default function CheckoutPage() {
   }
 
   function formatExpiry(value: string) {
+    // Allow user to type or delete the slash naturally
     const digits = value.replace(/\D/g, '').slice(0, 4);
-    if (digits.length >= 3) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-    return digits;
+    if (digits.length === 0) return '';
+    if (digits.length <= 2) return digits;
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitting(true);
-    // Simulate processing delay
-    await new Promise((r) => setTimeout(r, 800));
-    clearCart();
-    const orderNumber = `TCG-${Date.now().toString().slice(-8).toUpperCase()}`;
-    router.push(`/order-confirmation?order=${orderNumber}`);
+    try {
+      await new Promise((r) => setTimeout(r, 800));
+      clearCart();
+      const orderNumber = `TCG-${Date.now().toString().slice(-8)}`;
+      router.push(`/order-confirmation?order=${orderNumber}`);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (

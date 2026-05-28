@@ -47,7 +47,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </span>
         </div>
         <button
-          onClick={() => addItem(product.id)}
+          onClick={() => addItem(product.id, product.stock)}
           disabled={product.stock === 0}
           className="mt-3 w-full py-2 px-4 text-sm font-medium bg-gray-900 text-white rounded hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >

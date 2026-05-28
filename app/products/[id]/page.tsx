@@ -75,7 +75,7 @@ export default function ProductDetailPage() {
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <button
-              onClick={() => addItem(product.id)}
+              onClick={() => addItem(product.id, product.stock)}
               disabled={product.stock === 0}
               className="flex-1 py-3 px-6 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >

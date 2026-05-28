@@ -72,17 +72,17 @@ export const products: Product[] = [
     featured: true,
   },
   {
-    id: 'mtg-lost-caverns-en',
-    name: "MTG The Lost Caverns of Ixalan Collector Booster Box",
+    id: 'mtg-karlov-manor-jp',
+    name: 'MTG Murders at Karlov Manor Draft Booster Box',
     tcg: 'mtg',
-    language: 'english',
+    language: 'japanese',
     type: 'booster-box',
-    price: 219.99,
-    stock: 5,
+    price: 84.99,
+    stock: 7,
     description:
-      "Dive deep with The Lost Caverns of Ixalan Collector Booster Box. Contains 12 collector packs, each guaranteed to have multiple rare and mythic rare cards plus extended art and special treatments.",
+      'Japanese edition of the Murders at Karlov Manor Draft Booster Box. 36 packs per box with full Japanese card text and distinct foil treatments. Popular with collectors who prefer the Japanese typography and art variants.',
     imageUrl:
-      'https://placehold.co/300x400/dcfce7/14532d?text=MTG+Ixalan+Box+EN',
+      'https://placehold.co/300x400/dcfce7/14532d?text=MTG+Karlov+Box+JP',
     featured: false,
   },
   {
