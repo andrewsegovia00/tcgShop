@@ -3,177 +3,238 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TCG Shop — Demo</title>
+<title>R&G TCG — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;background:#fff;min-height:100vh;display:flex;flex-direction:column}
-  a{color:inherit;text-decoration:none;cursor:pointer}
-  button{cursor:pointer;font-family:inherit}
+/* ── Tokens ───────────────────────────────────────────────────────── */
+:root {
+  --color-primary:#6b3bd6; --color-primary-strong:#5a2fc0;
+  --color-primary-soft:#a07cff; --color-primary-tint:#ede7fb;
+  --color-secondary:#3f6df0; --color-success:#2a8f64;
+  --color-accent-pink:#c94b9b; --color-warning:#e08a2b;
+  --color-danger:#d23b3b; --color-bg:#f7f5fb;
+  --color-surface:#ffffff; --color-surface-alt:#f2eefb;
+  --color-ink:#1a1320; --color-text-muted:#6b6478;
+  --color-text-inverse:#ffffff; --color-border:#1a1320;
+  --color-border-soft:#e3ddec;
+  --font-display:"Bagel Fat One",Georgia,serif;
+  --font-body:"Space Grotesk",-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  --outline:2px solid #1a1320;
+  --shadow-offset-sm:3px 3px 0 #1a1320;
+  --shadow-offset-md:4px 4px 0 #1a1320;
+  --shadow-offset-accent:3px 3px 0 #6b3bd6;
+  --radius-sm:6px; --radius-md:12px; --radius-lg:20px; --radius-pill:999px;
+  --ease-bounce:cubic-bezier(0.34,1.56,0.64,1);
+  --ease-std:cubic-bezier(0.22,1,0.36,1);
+}
 
-  /* NAV */
-  nav{border-bottom:1px solid #e5e7eb;background:#fff;position:sticky;top:0;z-index:50}
-  .nav-inner{max-width:1120px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:64px}
-  .nav-logo{font-size:1.1rem;font-weight:700;letter-spacing:-.02em}
-  .nav-links{display:flex;align-items:center;gap:2rem}
-  .nav-links a{font-size:.875rem;color:#4b5563}
-  .nav-links a:hover{color:#111}
-  .nav-cart{position:relative;display:flex;align-items:center;gap:.25rem;font-size:.875rem;color:#4b5563}
-  .cart-badge{position:absolute;top:-8px;right:-12px;background:#111;color:#fff;font-size:.65rem;border-radius:999px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-weight:600}
-  .hamburger{display:none;background:none;border:none;padding:4px}
-  .mobile-menu{display:none;border-top:1px solid #e5e7eb;padding:.5rem 1rem}
-  .mobile-menu a{display:block;padding:.5rem .25rem;font-size:.875rem;color:#4b5563;border-radius:4px}
-  .mobile-menu a:hover{background:#f9fafb;color:#111}
-  @media(max-width:640px){.nav-links{display:none}.hamburger{display:block}}
+/* ── Reset ────────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-ink);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit;text-decoration:none;cursor:pointer}
+button{cursor:pointer;font-family:var(--font-body)}
 
-  /* LAYOUT */
-  main{flex:1}
-  footer{border-top:1px solid #e5e7eb;padding:2rem 1rem}
-  .footer-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem}
-  .footer-copy{font-size:.75rem;color:#9ca3af;margin-top:1.5rem;max-width:1120px;margin-left:auto;margin-right:auto}
+/* ── Nav ──────────────────────────────────────────────────────────── */
+nav{border-bottom:var(--outline);background:var(--color-surface);box-shadow:var(--shadow-offset-sm);position:sticky;top:0;z-index:50}
+.nav-inner{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{font-family:var(--font-display);font-size:1.5rem;color:var(--color-ink);letter-spacing:-.02em}
+.nav-links{display:flex;align-items:center;gap:24px}
+.nav-links a{font-weight:600;font-size:14px;color:var(--color-text-muted)}
+.nav-links a:hover{color:var(--color-ink)}
+.bag-btn{position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:var(--outline);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-offset-sm);transition:transform .12s var(--ease-bounce),box-shadow .12s var(--ease-bounce),background .1s;cursor:pointer}
+.bag-btn:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow-offset-md)}
+.bag-btn.drag-over{background:var(--color-primary-tint);border-color:var(--color-primary);box-shadow:0 0 0 4px var(--color-primary-tint),var(--shadow-offset-accent)}
+.bag-btn.drag-active{animation:bag-pulse .6s var(--ease-bounce) infinite alternate}
+.bag-badge{position:absolute;top:-8px;right:-8px;background:var(--color-primary);color:#fff;font-family:var(--font-mono);font-weight:700;font-size:9px;width:18px;height:18px;border-radius:var(--radius-pill);border:var(--outline);display:flex;align-items:center;justify-content:center;display:none}
+.drag-hint{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--color-primary);letter-spacing:2px;white-space:nowrap;display:none;pointer-events:none}
+.hamburger{display:none;width:40px;height:40px;align-items:center;justify-content:center;border:var(--outline);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-offset-sm)}
+.mobile-menu{display:none;border-top:var(--outline);background:var(--color-surface);padding:12px 20px}
+.mobile-menu a{display:block;padding:8px 12px;font-weight:600;font-size:14px;color:var(--color-ink);border-radius:var(--radius-sm)}
+.mobile-menu a:hover{background:var(--color-surface-alt)}
+@media(max-width:600px){.nav-links{display:none}.hamburger{display:flex}}
+@keyframes bag-pulse{from{transform:scale(1)}to{transform:scale(1.12)}}
 
-  /* PAGE CONTAINERS */
-  .page{display:none;max-width:1120px;margin:0 auto;padding:2.5rem 1rem}
-  .page.active{display:block}
+/* ── Layout ───────────────────────────────────────────────────────── */
+main{flex:1}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.page{display:none}.page.active{display:block}
 
-  /* HERO */
-  .hero{border-bottom:1px solid #e5e7eb;text-align:center;padding:5rem 1rem}
-  .hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:700;letter-spacing:-.03em;line-height:1.1}
-  .hero p{margin-top:1rem;color:#6b7280;font-size:1rem;max-width:480px;margin-left:auto;margin-right:auto}
-  .hero-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
-  .btn-dark{padding:.75rem 1.5rem;background:#111;color:#fff;font-size:.875rem;font-weight:500;border-radius:6px;border:none}
-  .btn-dark:hover{background:#374151}
-  .btn-outline{padding:.75rem 1.5rem;border:1px solid #d1d5db;color:#374151;font-size:.875rem;font-weight:500;border-radius:6px;background:#fff}
-  .btn-outline:hover{background:#f9fafb}
+/* ── Buttons ──────────────────────────────────────────────────────── */
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;padding:11px 20px;background:var(--color-primary);color:var(--color-text-inverse);border:var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-offset-accent);transition:transform .12s var(--ease-bounce),box-shadow .12s,background .1s;cursor:pointer}
+.btn-primary:hover{background:var(--color-primary-strong);transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--color-primary-strong)}
+.btn-primary:disabled{background:#d1d5db;border-color:#9ca3af;box-shadow:2px 2px 0 #9ca3af;cursor:not-allowed;transform:none}
+.btn-outline{display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;padding:11px 20px;background:var(--color-surface);color:var(--color-ink);border:var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-offset-sm);transition:transform .12s var(--ease-bounce),box-shadow .12s;cursor:pointer}
+.btn-outline:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow-offset-md);background:var(--color-surface-alt)}
 
-  /* SECTION */
-  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
-  .section-header h2{font-size:1.125rem;font-weight:600}
-  .section-header a{font-size:.875rem;color:#6b7280;text-decoration:underline}
-  .section-header a:hover{color:#111}
+/* ── Chips / eyebrow ─────────────────────────────────────────────── */
+.chip{font-family:var(--font-mono);font-weight:600;font-size:11px;letter-spacing:.5px;padding:5px 10px;border-radius:var(--radius-pill);background:var(--color-surface);border:var(--outline);box-shadow:var(--shadow-offset-sm)}
+.eyebrow{font-family:var(--font-mono);font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--color-primary)}
 
-  /* PRODUCT GRID */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem}
-  .card{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
-  .card img{width:100%;height:190px;object-fit:cover;display:block}
-  .card-body{padding:1rem;flex:1;display:flex;flex-direction:column}
-  .card-meta{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
-  .card-title{font-size:.8125rem;font-weight:500;color:#111;line-height:1.35;flex:1}
-  .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:.75rem}
-  .card-price{font-size:.9375rem;font-weight:600}
-  .card-stock{font-size:.7rem}
-  .stock-ok{color:#16a34a}
-  .stock-no{color:#dc2626}
-  .card-btn{margin-top:.75rem;width:100%;padding:.5rem;font-size:.8125rem;font-weight:500;background:#111;color:#fff;border:none;border-radius:5px}
-  .card-btn:hover{background:#374151}
-  .card-btn:disabled{background:#d1d5db;cursor:not-allowed}
+/* ── Sticker card ────────────────────────────────────────────────── */
+.sticker-card{background:var(--color-surface);border:var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-offset-sm);transition:transform .15s var(--ease-std),box-shadow .15s var(--ease-std)}
+.sticker-card:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow-offset-md)}
 
-  /* GAME TILES */
-  .game-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
-  .game-tile{border:1px solid;border-radius:8px;padding:1.5rem 1rem;text-align:center;cursor:pointer}
-  .game-tile:hover{box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  .game-tile p{font-weight:500;font-size:.9375rem}
-  .game-tile small{font-size:.8rem;color:#6b7280;margin-top:.25rem;display:block}
-  .poke-tile{background:#fef9c3;border-color:#fde68a}
-  .ygo-tile{background:#ede9fe;border-color:#ddd6fe}
-  .mtg-tile{background:#dcfce7;border-color:#bbf7d0}
+/* ── Hero ────────────────────────────────────────────────────────── */
+.hero{border-bottom:var(--outline);background:var(--color-surface);padding:64px 20px;text-align:center}
+.hero-bag{width:112px;height:112px;background:var(--color-primary-tint);border:var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-offset-md);display:flex;align-items:center;justify-content:center;margin:0 auto 28px}
+.hero h1{font-family:var(--font-display);font-size:clamp(2.25rem,6vw,3.5rem);line-height:1.05;letter-spacing:-.02em}
+.hero p{font-size:16px;color:var(--color-text-muted);max-width:480px;margin:18px auto 0;line-height:1.6}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px}
 
-  /* FILTERS */
-  .filters{display:flex;flex-wrap:wrap;gap:1.5rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid #e5e7eb}
-  .filter-group label{display:block;font-size:.7rem;font-weight:500;color:#6b7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem}
-  .filter-btns{display:flex;flex-wrap:wrap;gap:.5rem}
-  .fbtn{padding:.375rem .75rem;font-size:.8125rem;border-radius:5px;border:1px solid #d1d5db;background:#fff;color:#4b5563}
-  .fbtn:hover{border-color:#6b7280}
-  .fbtn.active{background:#111;color:#fff;border-color:#111}
-  .results-count{font-size:.875rem;color:#6b7280;margin-bottom:1.25rem}
+/* ── Product grid ────────────────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:20px}
+.pcard{background:var(--color-surface);border:var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-offset-sm);display:flex;flex-direction:column;transition:transform .15s var(--ease-std),box-shadow .15s var(--ease-std);cursor:grab}
+.pcard:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow-offset-md)}
+.pcard.dragging{opacity:.5;cursor:grabbing}
+.pcard-img{border-bottom:var(--outline);border-radius:var(--radius-md) var(--radius-md) 0 0;overflow:hidden;aspect-ratio:3/4;background:var(--color-surface-alt)}
+.pcard-img img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.pcard-body{padding:12px;flex:1;display:flex;flex-direction:column;gap:8px}
+.pcard-chips{display:flex;align-items:center;gap:6px}
+.pcard-chip{font-family:var(--font-mono);font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:var(--radius-pill);border:1px solid currentColor}
+.pcard-lang{font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted);text-transform:capitalize}
+.pcard-name{font-weight:600;font-size:13px;line-height:1.3;flex:1;cursor:pointer}
+.pcard-name:hover{color:var(--color-primary)}
+.pcard-row{display:flex;align-items:flex-end;justify-content:space-between}
+.pcard-price{font-family:var(--font-display);font-size:22px;line-height:1}
+.pcard-stock-ok{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--color-success)}
+.pcard-stock-no{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--color-danger)}
+.pcard-cta{margin-top:4px}
+.drag-note{text-align:center;font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--color-text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
 
-  /* PRODUCT DETAIL */
-  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
-  @media(max-width:680px){.detail-grid{grid-template-columns:1fr}}
-  .detail-img-wrap{border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;display:flex;align-items:center;justify-content:center;padding:1rem;min-height:320px}
-  .detail-img-wrap img{max-height:340px;width:auto;object-fit:contain}
-  .detail-meta{font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem}
-  .detail-title{font-size:1.5rem;font-weight:700;line-height:1.2;letter-spacing:-.02em}
-  .detail-price{font-size:2rem;font-weight:600;margin-top:1rem}
-  .detail-stock{font-size:.875rem;margin-top:.25rem}
-  .detail-desc{font-size:.875rem;color:#4b5563;line-height:1.6;margin-top:1.25rem}
-  .detail-actions{display:flex;gap:.75rem;margin-top:1.5rem;flex-wrap:wrap}
-  .detail-actions .btn-dark,.detail-actions .btn-outline{flex:1;min-width:120px;text-align:center}
-  .detail-specs{margin-top:2rem;border-top:1px solid #e5e7eb;padding-top:1.5rem}
-  .detail-specs h3{font-size:.875rem;font-weight:600;margin-bottom:.75rem}
-  .spec-row{display:flex;font-size:.875rem;gap:1rem;margin-bottom:.5rem}
-  .spec-label{width:90px;color:#6b7280;flex-shrink:0}
-  .breadcrumb{font-size:.8125rem;color:#6b7280;display:flex;gap:.5rem;margin-bottom:1.5rem}
-  .breadcrumb a:hover{color:#111}
-  .related-section{margin-top:3rem;border-top:1px solid #e5e7eb;padding-top:2rem}
-  .related-section h2{font-size:1rem;font-weight:600;margin-bottom:1.25rem}
+/* ── Section ─────────────────────────────────────────────────────── */
+.sec{padding:48px 0}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px}
+.sec-head h2{font-family:var(--font-display);font-size:36px;color:var(--color-ink)}
+.sec-head a{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--color-primary);letter-spacing:2px;text-transform:uppercase}
+.game-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.gtile{border:var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-offset-sm);padding:24px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.gtile:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow-offset-md)}
+.gtile-name{font-family:var(--font-display);font-size:22px}
+.gtile-sub{font-family:var(--font-mono);font-size:11px;color:var(--color-text-muted);margin-top:4px;letter-spacing:1px}
 
-  /* CART */
-  .cart-item{display:flex;gap:1rem;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;align-items:flex-start}
-  .cart-item+.cart-item{margin-top:.75rem}
-  .cart-item img{width:56px;height:70px;object-fit:cover;border-radius:4px;border:1px solid #f3f4f6;flex-shrink:0}
-  .cart-item-body{flex:1;min-width:0}
-  .cart-item-name{font-size:.8125rem;font-weight:500;color:#111;line-height:1.35}
-  .cart-item-lang{font-size:.7rem;color:#6b7280;margin-top:2px;text-transform:capitalize}
-  .cart-item-price{font-size:.875rem;font-weight:500;margin-top:.25rem}
-  .qty-controls{display:flex;align-items:center;gap:.5rem;margin-top:.75rem}
-  .qty-btn{width:28px;height:28px;border:1px solid #d1d5db;border-radius:4px;background:#fff;font-size:1rem;display:flex;align-items:center;justify-content:center;line-height:1;color:#374151}
-  .qty-btn:hover{background:#f9fafb}
-  .qty-btn:disabled{opacity:.35;cursor:not-allowed}
-  .qty-val{font-size:.875rem;width:28px;text-align:center}
-  .cart-item-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:.5rem}
-  .remove-btn{background:none;border:none;color:#9ca3af;font-size:1.1rem;line-height:1;padding:2px}
-  .remove-btn:hover{color:#dc2626}
-  .cart-line-total{font-size:.875rem;font-weight:600}
-  .order-summary{margin-top:2rem;border-top:1px solid #e5e7eb;padding-top:1.5rem}
-  .summary-row{display:flex;justify-content:space-between;font-size:.875rem;color:#4b5563;margin-bottom:.5rem}
-  .summary-total{display:flex;justify-content:space-between;font-size:1rem;font-weight:600;border-top:1px solid #e5e7eb;padding-top:1rem;margin-top:.5rem}
-  .cart-actions{display:flex;flex-direction:column;gap:.75rem;margin-top:1.5rem}
-  .empty-state{text-align:center;padding:5rem 1rem}
-  .empty-state svg{color:#d1d5db;margin:0 auto 1rem}
-  .empty-state h1{font-size:1.25rem;font-weight:600}
-  .empty-state p{font-size:.875rem;color:#6b7280;margin-top:.5rem}
-  .empty-state .btn-dark{margin-top:1.5rem;display:inline-block}
+/* ── Filters ────────────────────────────────────────────────────── */
+.filter-card{margin-bottom:32px}
+.filter-inner{display:flex;flex-wrap:wrap;gap:24px;padding:20px}
+.filter-group label.eyebrow{display:block;margin-bottom:10px}
+.filter-btns{display:flex;gap:8px;flex-wrap:wrap}
+.fbtn{font-family:var(--font-mono);font-weight:600;font-size:12px;padding:6px 14px;border-radius:var(--radius-md);border:var(--outline);background:var(--color-surface);color:var(--color-text-muted);box-shadow:var(--shadow-offset-sm);transition:transform .1s var(--ease-bounce),box-shadow .1s,background .1s;cursor:pointer}
+.fbtn:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow-offset-md);background:var(--color-surface-alt)}
+.fbtn.active{background:var(--color-primary);color:var(--color-text-inverse);box-shadow:var(--shadow-offset-accent)}
+.results-count{font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);margin-bottom:20px}
+.results-count b{color:var(--color-ink)}
 
-  /* CHECKOUT */
-  .checkout-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
-  @media(max-width:720px){.checkout-grid{grid-template-columns:1fr}}
-  fieldset{border:none;margin-bottom:1.5rem}
-  legend{font-size:.875rem;font-weight:600;color:#111;padding-bottom:.75rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:.75rem}
-  legend span{font-size:.75rem;font-weight:400;color:#9ca3af}
-  .form-row{margin-bottom:.75rem}
-  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
-  label{display:block;font-size:.75rem;font-weight:500;color:#4b5563;margin-bottom:.25rem}
-  input[type=text],input[type=email]{width:100%;border:1px solid #d1d5db;border-radius:5px;padding:.5rem .75rem;font-size:.875rem;font-family:inherit;outline:none}
-  input[type=text]:focus,input[type=email]:focus{border-color:#6b7280;box-shadow:0 0 0 2px rgba(107,114,128,.15)}
-  input.mono{font-family:'Courier New',monospace}
-  .checkout-summary h2{font-size:.875rem;font-weight:600;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #e5e7eb}
-  .co-item{display:flex;gap:.75rem;font-size:.875rem;margin-bottom:.75rem;align-items:flex-start}
-  .co-item img{width:40px;height:50px;object-fit:cover;border-radius:3px;border:1px solid #f3f4f6;flex-shrink:0}
-  .co-item-name{font-weight:500;line-height:1.3;flex:1}
-  .co-item-sub{font-size:.7rem;color:#6b7280;text-transform:capitalize;margin-top:2px}
-  .co-item-price{font-weight:500;flex-shrink:0}
-  .co-total{display:flex;justify-content:space-between;font-size:.9375rem;font-weight:600;border-top:1px solid #e5e7eb;padding-top:.75rem;margin-top:.5rem}
-  #processing{display:none;text-align:center;padding:3rem 1rem}
-  #processing p{color:#6b7280;font-size:.875rem;margin-top:.75rem}
+/* ── Product detail ─────────────────────────────────────────────── */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+@media(max-width:680px){.detail-grid{grid-template-columns:1fr}}
+.detail-img{border:var(--outline);border-radius:var(--radius-md);background:var(--color-surface-alt);box-shadow:var(--shadow-offset-md);display:flex;align-items:center;justify-content:center;padding:24px;min-height:320px;cursor:grab}
+.detail-img img{max-height:360px;width:auto;object-fit:contain;pointer-events:none}
+.detail-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.detail-title{font-family:var(--font-display);font-size:30px;line-height:1.1;color:var(--color-ink)}
+.detail-price{font-family:var(--font-display);font-size:36px;color:var(--color-ink);margin-top:12px}
+.detail-stock-ok{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--color-success);margin-top:4px}
+.detail-stock-no{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--color-danger);margin-top:4px}
+.detail-desc{font-size:14px;color:var(--color-text-muted);line-height:1.6;margin-top:16px}
+.detail-actions{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+.detail-actions button,.detail-actions a{flex:1;min-width:120px}
+.drag-note-detail{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--color-text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:8px}
+.detail-specs{margin-top:28px;border-top:var(--outline);padding-top:20px}
+.spec-row{display:flex;font-size:14px;gap:16px;margin-bottom:8px}
+.spec-label{width:80px;font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);flex-shrink:0}
+.breadcrumb{font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);display:flex;gap:8px;align-items:center;margin-bottom:24px}
+.related{margin-top:56px;border-top:var(--outline);padding-top:36px}
+.related h2{font-family:var(--font-display);font-size:30px;margin-bottom:20px}
 
-  /* ORDER CONFIRM */
-  .confirm-wrap{text-align:center;padding:5rem 1rem;max-width:500px;margin:0 auto}
-  .confirm-icon{width:64px;height:64px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#16a34a}
-  .confirm-box{border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;text-align:left;margin:1.5rem 0}
-  .confirm-row{display:flex;justify-content:space-between;font-size:.875rem;padding:.35rem 0}
-  .confirm-row:not(:last-child){border-bottom:1px solid #f3f4f6}
-  .confirm-label{color:#6b7280}
-  .confirm-status{color:#16a34a;font-weight:500}
-  .confirm-note{font-size:.75rem;color:#9ca3af;margin-top:.75rem}
-  .confirm-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
+/* ── Cart ───────────────────────────────────────────────────────── */
+.cart-item{display:flex;gap:16px;align-items:flex-start}
+.cart-item+.cart-item{margin-top:16px}
+.cart-item img{width:56px;border-radius:4px;border:var(--outline);flex-shrink:0;aspect-ratio:3/4;object-fit:cover;height:72px}
+.cart-item-body{flex:1;min-width:0}
+.cart-item-name{font-weight:600;font-size:13px;line-height:1.3;cursor:pointer}
+.cart-item-name:hover{color:var(--color-primary)}
+.cart-item-lang{font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted);text-transform:capitalize;margin-top:2px}
+.cart-item-price{font-family:var(--font-display);font-size:22px;margin-top:4px}
+.qty-controls{display:flex;align-items:center;gap:8px;margin-top:10px}
+.qty-btn{width:28px;height:28px;border:var(--outline);border-radius:var(--radius-sm);background:var(--color-surface);font-family:var(--font-mono);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-offset-sm)}
+.qty-btn:hover{background:var(--color-surface-alt)}
+.qty-btn:disabled{opacity:.4;cursor:not-allowed}
+.qty-val{font-family:var(--font-mono);font-weight:700;font-size:13px;width:28px;text-align:center}
+.cart-item-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:8px}
+.remove-btn{background:none;border:none;font-family:var(--font-mono);font-weight:700;font-size:14px;color:var(--color-text-muted)}
+.remove-btn:hover{color:var(--color-danger)}
+.cart-line-total{font-family:var(--font-display);font-size:22px}
+.order-summary-card{margin-top:24px}
+.summary-row{display:flex;justify-content:space-between;font-size:14px;color:var(--color-text-muted);margin-bottom:8px;padding:0 20px}
+.summary-total{display:flex;justify-content:space-between;font-family:var(--font-display);font-size:22px;color:var(--color-ink);border-top:var(--outline);padding:16px 20px 0;margin-top:8px}
+.cart-actions{display:flex;flex-direction:column;gap:12px;padding:20px}
+.empty-state{text-align:center;padding:80px 20px}
+.empty-bag-icon{width:80px;height:80px;background:var(--color-primary-tint);border:var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-offset-md);display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
+.empty-state h1{font-family:var(--font-display);font-size:30px}
+.empty-state p{font-size:14px;color:var(--color-text-muted);margin-top:8px}
 
-  /* SPINNER */
-  .spinner{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#111;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
-  @keyframes spin{to{transform:rotate(360deg)}}
+/* ── Checkout ────────────────────────────────────────────────────── */
+.checkout-grid{display:grid;grid-template-columns:1fr 360px;gap:40px}
+@media(max-width:760px){.checkout-grid{grid-template-columns:1fr}}
+.form-section{margin-bottom:24px}
+.form-sec-label{display:block;margin-bottom:16px}
+.form-row{margin-bottom:12px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+label.field-label{display:block;font-family:var(--font-mono);font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:4px}
+input.field{width:100%;border:var(--outline);border-radius:var(--radius-md);padding:10px 14px;font-family:var(--font-body);font-size:14px;background:var(--color-surface);color:var(--color-ink);box-shadow:var(--shadow-offset-sm);outline:none;transition:box-shadow .1s}
+input.field:focus{box-shadow:0 0 0 3px var(--color-primary-tint),var(--shadow-offset-sm)}
+input.mono-field{font-family:var(--font-mono)}
+.co-summary-card{position:sticky;top:84px}
+.co-item{display:flex;gap:12px;margin-bottom:12px}
+.co-item img{width:40px;height:50px;object-fit:cover;border-radius:4px;border:var(--outline);flex-shrink:0}
+.co-item-name{font-weight:600;font-size:13px;line-height:1.3;flex:1}
+.co-item-sub{font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted);text-transform:capitalize;margin-top:2px}
+.co-item-price{font-family:var(--font-display);font-size:22px;flex-shrink:0}
+.co-total{display:flex;justify-content:space-between;align-items:center;border-top:var(--outline);padding-top:16px;margin-top:8px}
+.co-total span{font-family:var(--font-display);font-size:22px}
+#processing{display:none;text-align:center;padding:48px}
+#processing p{font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);margin-top:12px;letter-spacing:1px}
 
-  /* TOAST */
-  #toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:#111;color:#fff;font-size:.8125rem;padding:.6rem 1.25rem;border-radius:6px;z-index:999;transition:transform .25s ease;white-space:nowrap;pointer-events:none}
-  #toast.show{transform:translateX(-50%) translateY(0)}
+/* ── Confirm ─────────────────────────────────────────────────────── */
+.confirm-wrap{max-width:520px;margin:0 auto;text-align:center;padding:80px 20px}
+.confirm-icon{width:80px;height:80px;background:var(--color-primary-tint);border:var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-offset-md);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;color:var(--color-success)}
+.confirm-title{font-family:var(--font-display);font-size:36px}
+.confirm-sub{font-size:14px;color:var(--color-text-muted);margin-top:12px;max-width:280px;margin-left:auto;margin-right:auto;line-height:1.6}
+.confirm-card{text-align:left;margin-top:28px;padding:20px}
+.confirm-row{display:flex;justify-content:space-between;font-size:14px;padding:8px 0;border-bottom:1px solid var(--color-border-soft)}
+.confirm-row:last-child{border-bottom:none}
+.confirm-row-label{font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted)}
+.confirm-row-val{font-family:var(--font-mono);font-size:12px;font-weight:700}
+.confirm-note{font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted);margin-top:12px}
+.confirm-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+footer{border-top:var(--outline);background:var(--color-surface);margin-top:auto}
+.footer-grid{max-width:1180px;margin:0 auto;padding:48px 20px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:40px}
+@media(max-width:700px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px}}
+@media(max-width:400px){.footer-grid{grid-template-columns:1fr}}
+.footer-brand{grid-column:span 2}
+@media(max-width:700px){.footer-brand{grid-column:span 2}}
+.footer-logo{font-family:var(--font-display);font-size:30px;color:var(--color-ink)}
+.footer-tagline{font-size:13px;color:var(--color-text-muted);margin-top:10px;max-width:280px;line-height:1.6}
+.footer-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.footer-col-head{display:block;margin-bottom:14px}
+.footer-col ul{list-style:none;space-y:8px}
+.footer-col li{margin-bottom:8px}
+.footer-col a{font-size:13px;color:var(--color-text-muted)}
+.footer-col a:hover{color:var(--color-ink)}
+.footer-bar{border-top:1.5px solid var(--color-border-soft)}
+.footer-bar-inner{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.footer-bar p{font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted)}
+
+/* ── Spinner ─────────────────────────────────────────────────────── */
+.spinner{width:32px;height:32px;border:3px solid var(--color-border-soft);border-top-color:var(--color-primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Toast ───────────────────────────────────────────────────────── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--color-ink);color:var(--color-text-inverse);font-family:var(--font-mono);font-size:12px;font-weight:700;padding:10px 20px;border-radius:var(--radius-md);border:var(--outline);box-shadow:var(--shadow-offset-md);z-index:999;transition:transform .2s var(--ease-bounce);pointer-events:none;letter-spacing:.5px}
+#toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -181,24 +242,31 @@
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a class="nav-logo" onclick="navigate('home')">TCG Shop</a>
+    <a class="nav-logo" onclick="navigate('home')">R&amp;G TCG</a>
     <div class="nav-links">
       <a onclick="navigate('home')">Home</a>
       <a onclick="navigate('browse')">Browse</a>
-      <a onclick="navigate('cart')" class="nav-cart">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-        Cart
-        <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+      <a onclick="navigate('cart')" class="bag-btn" id="navBag" title="View bag"
+         ondragover="bagDragOver(event)" ondragleave="bagDragLeave()" ondrop="bagDrop(event)">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span class="bag-badge" id="navBadge">0</span>
+        <span class="drag-hint" id="dragHint">DROP HERE</span>
       </a>
     </div>
     <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
-      <svg id="menuIcon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
     </button>
   </div>
   <div class="mobile-menu" id="mobileMenu">
     <a onclick="navigate('home');closeMenu()">Home</a>
     <a onclick="navigate('browse');closeMenu()">Browse</a>
-    <a onclick="navigate('cart');closeMenu()">Cart <span id="mobileCartCount"></span></a>
+    <a onclick="navigate('cart');closeMenu()">Bag <span id="mobileBadge"></span></a>
   </div>
 </nav>
 
@@ -207,25 +275,43 @@
 <!-- HOME -->
 <div id="page-home" class="page active">
   <div class="hero">
-    <h1>Trading Card Games</h1>
-    <p>Shop sealed booster boxes and packs for Pokémon, Yu-Gi-Oh!, and Magic: The Gathering. English and Japanese editions.</p>
+    <div class="hero-bag">
+      <svg width="56" height="56" fill="none" stroke="#1a1320" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 64 64">
+        <path d="M16 8 8 16v36a4 4 0 0 0 4 4h40a4 4 0 0 0 4-4V16l-8-8z" fill="#ede7fb"/>
+        <line x1="8" y1="16" x2="56" y2="16"/>
+        <path d="M40 26a8 8 0 0 1-16 0"/>
+        <circle cx="24" cy="26" r="2" fill="#6b3bd6" stroke="none"/>
+        <circle cx="40" cy="26" r="2" fill="#6b3bd6" stroke="none"/>
+      </svg>
+    </div>
+    <div class="eyebrow" style="margin-bottom:14px">R&amp;G TCG · Sealed product, hand-checked</div>
+    <h1>Crack packs.<br>Build decks.<br>Rep your game.</h1>
+    <p>Booster boxes &amp; packs for Pokémon, Magic, Yu-Gi-Oh! and more — <strong style="color:var(--color-ink)">drag any card into the bag</strong> or tap <em>Add to bag</em>. We handle the rest.</p>
     <div class="hero-btns">
-      <button class="btn-dark" onclick="navigate('browse')">Browse All Products</button>
+      <button class="btn-primary" onclick="navigate('browse')">Browse all products</button>
       <button class="btn-outline" onclick="navigate('browse','pokemon')">Shop Pokémon</button>
     </div>
   </div>
-  <div style="max-width:1120px;margin:0 auto;padding:3rem 1rem">
-    <div class="section-header">
-      <h2>Featured Products</h2>
-      <a onclick="navigate('browse')">View all</a>
+  <div class="wrap">
+    <div class="sec">
+      <div class="sec-head">
+        <h2>Featured drops</h2>
+        <a onclick="navigate('browse')">VIEW ALL →</a>
+      </div>
+      <div class="grid" id="featuredGrid"></div>
     </div>
-    <div class="grid" id="featuredGrid"></div>
-    <div style="margin-top:3rem;border-top:1px solid #e5e7eb;padding-top:2.5rem">
-      <h2 style="font-size:1.125rem;font-weight:600;margin-bottom:1.25rem">Shop by Game</h2>
+    <div class="sec" style="border-top:var(--outline)">
+      <h2 class="sec-head" style="margin-bottom:20px"><span style="font-family:var(--font-display);font-size:36px">Shop by game</span></h2>
       <div class="game-tiles">
-        <div class="game-tile poke-tile" onclick="navigate('browse','pokemon')"><p>Pokémon</p><small>Browse all products →</small></div>
-        <div class="game-tile ygo-tile" onclick="navigate('browse','yugioh')"><p>Yu-Gi-Oh!</p><small>Browse all products →</small></div>
-        <div class="game-tile mtg-tile" onclick="navigate('browse','mtg')"><p>Magic: The Gathering</p><small>Browse all products →</small></div>
+        <div class="gtile" style="background:var(--color-primary-tint);border-color:var(--color-primary)" onclick="navigate('browse','pokemon')">
+          <div class="gtile-name" style="color:var(--color-primary)">Pokémon</div><div class="gtile-sub">Browse all →</div>
+        </div>
+        <div class="gtile" style="background:#f3f0ff;border-color:var(--color-primary-soft)" onclick="navigate('browse','yugioh')">
+          <div class="gtile-name" style="color:var(--color-primary-soft)">Yu-Gi-Oh!</div><div class="gtile-sub">Browse all →</div>
+        </div>
+        <div class="gtile" style="background:#eff4ff;border-color:var(--color-secondary)" onclick="navigate('browse','mtg')">
+          <div class="gtile-name" style="color:var(--color-secondary)">Magic</div><div class="gtile-sub">Browse all →</div>
+        </div>
       </div>
     </div>
   </div>
@@ -233,370 +319,421 @@
 
 <!-- BROWSE -->
 <div id="page-browse" class="page">
-  <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem">Browse Products</h1>
-  <div class="filters">
-    <div class="filter-group">
-      <label>Game</label>
-      <div class="filter-btns" id="tcgFilters">
-        <button class="fbtn active" data-tcg="all">All Games</button>
-        <button class="fbtn" data-tcg="pokemon">Pokémon</button>
-        <button class="fbtn" data-tcg="yugioh">Yu-Gi-Oh!</button>
-        <button class="fbtn" data-tcg="mtg">Magic: The Gathering</button>
+  <div class="wrap" style="padding-top:40px;padding-bottom:40px">
+    <div style="margin-bottom:28px">
+      <div class="eyebrow" style="margin-bottom:8px">R&amp;G TCG · All sealed product</div>
+      <h1 style="font-family:var(--font-display);font-size:36px">Find your next pull</h1>
+      <p style="font-size:13px;color:var(--color-text-muted);margin-top:4px">Drag any card to the bag, or tap <em>Add to bag</em>. Filters apply instantly.</p>
+    </div>
+    <div class="sticker-card filter-card">
+      <div class="filter-inner">
+        <div class="filter-group">
+          <label class="eyebrow">Game</label>
+          <div class="filter-btns" id="tcgFilters">
+            <button class="fbtn active" data-tcg="all">All games</button>
+            <button class="fbtn" data-tcg="pokemon">Pokémon</button>
+            <button class="fbtn" data-tcg="yugioh">Yu-Gi-Oh!</button>
+            <button class="fbtn" data-tcg="mtg">Magic</button>
+          </div>
+        </div>
+        <div style="width:1px;background:var(--color-border-soft)"></div>
+        <div class="filter-group">
+          <label class="eyebrow">Language</label>
+          <div class="filter-btns" id="langFilters">
+            <button class="fbtn active" data-lang="all">All languages</button>
+            <button class="fbtn" data-lang="english">English</button>
+            <button class="fbtn" data-lang="japanese">Japanese</button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="filter-group">
-      <label>Language</label>
-      <div class="filter-btns" id="langFilters">
-        <button class="fbtn active" data-lang="all">All Languages</button>
-        <button class="fbtn" data-lang="english">English</button>
-        <button class="fbtn" data-lang="japanese">Japanese</button>
-      </div>
+    <p class="results-count" id="resultsCount"></p>
+    <div class="grid" id="browseGrid"></div>
+    <div id="noResults" style="display:none;text-align:center;padding:64px 0">
+      <p style="color:var(--color-text-muted)">Nothing matches those filters.</p>
+      <button style="margin-top:12px;font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--color-primary);background:none;border:none;text-decoration:underline" onclick="resetFilters()">Clear filters</button>
     </div>
-  </div>
-  <p class="results-count" id="resultsCount"></p>
-  <div class="grid" id="browseGrid"></div>
-  <div id="noResults" style="display:none;text-align:center;padding:4rem 0">
-    <p style="color:#6b7280">No products match your filters.</p>
-    <button style="margin-top:.75rem;font-size:.875rem;text-decoration:underline;background:none;border:none;color:#111" onclick="resetFilters()">Clear filters</button>
   </div>
 </div>
 
 <!-- PRODUCT DETAIL -->
 <div id="page-product" class="page">
-  <div class="breadcrumb">
-    <a onclick="navigate('home')">Home</a><span>/</span>
-    <a onclick="navigate('browse')">Browse</a><span>/</span>
-    <span id="detailBreadcrumb" style="color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px"></span>
-  </div>
-  <div class="detail-grid">
-    <div class="detail-img-wrap"><img id="detailImg" src="" alt=""/></div>
-    <div>
-      <div class="detail-meta" id="detailMeta"></div>
-      <h1 class="detail-title" id="detailTitle"></h1>
-      <p class="detail-price" id="detailPrice"></p>
-      <p class="detail-stock" id="detailStock"></p>
-      <p class="detail-desc" id="detailDesc"></p>
-      <div class="detail-actions">
-        <button class="btn-dark" id="detailAddBtn" onclick="detailAddToCart()">Add to Cart</button>
-        <button class="btn-outline" id="detailViewCartBtn" style="display:none" onclick="navigate('cart')">View Cart</button>
+  <div class="wrap" style="padding-top:40px;padding-bottom:40px">
+    <div class="breadcrumb">
+      <a onclick="navigate('home')">Home</a><span>/</span>
+      <a onclick="navigate('browse')">Browse</a><span>/</span>
+      <span id="detailBreadcrumb" style="color:var(--color-ink);font-weight:700;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-img" id="detailImgWrap" draggable="true"
+           ondragstart="detailDragStart(event)" ondragend="detailDragEnd()">
+        <img id="detailImg" src="" alt=""/>
       </div>
-      <div class="detail-specs">
-        <h3>Product Details</h3>
-        <div id="detailSpecs"></div>
+      <div>
+        <div class="detail-chips" id="detailChips"></div>
+        <div class="detail-title" id="detailTitle"></div>
+        <div class="detail-price" id="detailPrice"></div>
+        <div id="detailStock"></div>
+        <p class="detail-desc" id="detailDesc"></p>
+        <div class="detail-actions">
+          <button class="btn-primary" id="detailAddBtn" onclick="detailAdd()">Add to bag</button>
+          <a class="btn-outline" id="detailViewBag" style="display:none;text-align:center" onclick="navigate('cart')">View bag</a>
+        </div>
+        <p class="drag-note-detail">↑ Or drag the image into the bag in the nav</p>
+        <div class="detail-specs">
+          <div class="eyebrow" style="margin-bottom:14px">Product details</div>
+          <div id="detailSpecs"></div>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="related-section" id="relatedSection">
-    <h2 id="relatedTitle"></h2>
-    <div class="grid" id="relatedGrid"></div>
+    <div class="related" id="relatedSection">
+      <h2 id="relatedTitle"></h2>
+      <div class="grid" id="relatedGrid"></div>
+    </div>
   </div>
 </div>
 
 <!-- CART -->
 <div id="page-cart" class="page">
-  <div id="cartContent"></div>
+  <div class="wrap" style="padding-top:40px;padding-bottom:40px;max-width:760px">
+    <div id="cartContent"></div>
+  </div>
 </div>
 
 <!-- CHECKOUT -->
 <div id="page-checkout" class="page">
-  <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:2rem">Checkout</h1>
-  <div id="processing" class="processing">
-    <div class="spinner"></div>
-    <p>Processing your order…</p>
-  </div>
-  <div id="checkoutForm">
-    <div class="checkout-grid">
-      <form onsubmit="submitOrder(event)">
-        <fieldset>
-          <legend>Contact Information</legend>
-          <div class="form-row"><label>Full Name</label><input type="text" id="co-name" placeholder="Jane Smith" required></div>
-          <div class="form-row"><label>Email</label><input type="email" id="co-email" placeholder="jane@example.com" required></div>
-        </fieldset>
-        <fieldset>
-          <legend>Shipping Address</legend>
-          <div class="form-row"><label>Street Address</label><input type="text" id="co-addr" placeholder="123 Main St" required></div>
-          <div class="form-row-2">
-            <div><label>City</label><input type="text" id="co-city" placeholder="New York" required></div>
-            <div><label>ZIP Code</label><input type="text" id="co-zip" placeholder="10001" required></div>
+  <div class="wrap" style="padding-top:40px;padding-bottom:40px">
+    <div class="eyebrow" style="margin-bottom:8px">Almost there</div>
+    <h1 style="font-family:var(--font-display);font-size:36px;margin-bottom:32px">Checkout</h1>
+    <div id="processing"><div class="spinner"></div><p>LOCKING IN YOUR ORDER…</p></div>
+    <div id="checkoutForm">
+      <div class="checkout-grid">
+        <form onsubmit="submitOrder(event)">
+          <div class="sticker-card form-section" style="padding:24px;margin-bottom:20px">
+            <span class="form-sec-label eyebrow">Contact</span>
+            <div class="form-row"><label class="field-label" for="co-name">Full name</label><input class="field" id="co-name" type="text" required placeholder="Jane Smith"/></div>
+            <div class="form-row"><label class="field-label" for="co-email">Email</label><input class="field" id="co-email" type="email" required placeholder="jane@example.com"/></div>
           </div>
-        </fieldset>
-        <fieldset>
-          <legend>Payment <span>(Demo — no real charges)</span></legend>
-          <div class="form-row"><label>Card Number</label><input type="text" id="co-card" class="mono" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)" required></div>
-          <div class="form-row-2">
-            <div><label>Expiry</label><input type="text" id="co-exp" class="mono" placeholder="MM/YY" maxlength="5" oninput="fmtExpiry(this)" required></div>
-            <div><label>CVV</label><input type="text" id="co-cvv" class="mono" placeholder="123" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" required></div>
+          <div class="sticker-card form-section" style="padding:24px;margin-bottom:20px">
+            <span class="form-sec-label eyebrow">Shipping address</span>
+            <div class="form-row"><label class="field-label" for="co-addr">Street address</label><input class="field" id="co-addr" type="text" required placeholder="123 Cardboard Way"/></div>
+            <div class="form-row-2">
+              <div><label class="field-label" for="co-city">City</label><input class="field" id="co-city" type="text" required placeholder="New York"/></div>
+              <div><label class="field-label" for="co-zip">ZIP</label><input class="field" id="co-zip" type="text" required placeholder="10001"/></div>
+            </div>
           </div>
-        </fieldset>
-        <button type="submit" class="btn-dark" id="placeOrderBtn" style="width:100%;padding:.875rem"></button>
-      </form>
-      <div class="checkout-summary">
-        <h2>Order Summary</h2>
-        <div id="coItems"></div>
-        <div class="co-total"><span>Total</span><span id="coTotal"></span></div>
+          <div class="sticker-card form-section" style="padding:24px;margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <span class="eyebrow">Payment</span>
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted)">Demo — no real charge</span>
+            </div>
+            <div class="form-row"><label class="field-label" for="co-card">Card number</label><input class="field mono-field" id="co-card" type="text" required placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)"/></div>
+            <div class="form-row-2">
+              <div><label class="field-label" for="co-exp">Expiry</label><input class="field mono-field" id="co-exp" type="text" required placeholder="MM/YY" maxlength="5" oninput="fmtExp(this)"/></div>
+              <div><label class="field-label" for="co-cvv">CVV</label><input class="field mono-field" id="co-cvv" type="text" required placeholder="123" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)"/></div>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" id="placeOrderBtn" style="width:100%;padding:14px;font-size:16px"></button>
+        </form>
+        <div class="co-summary-card sticker-card" style="padding:24px;align-self:start">
+          <div class="eyebrow" style="margin-bottom:16px">Order summary</div>
+          <div id="coItems"></div>
+          <div class="co-total"><span>Total</span><span id="coTotal"></span></div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ORDER CONFIRMATION -->
+<!-- CONFIRM -->
 <div id="page-confirm" class="page">
   <div class="confirm-wrap">
     <div class="confirm-icon">
-      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+      </svg>
     </div>
-    <h1 style="font-size:1.5rem;font-weight:700">Order Placed!</h1>
-    <p style="color:#6b7280;font-size:.875rem;margin-top:.5rem">Thank you for your purchase. Your order has been received.</p>
-    <div class="confirm-box">
-      <div class="confirm-row"><span class="confirm-label">Order number</span><span id="confirmOrderNum" style="font-family:monospace;font-weight:600"></span></div>
-      <div class="confirm-row"><span class="confirm-label">Status</span><span class="confirm-status">Confirmed</span></div>
-      <div class="confirm-row"><span class="confirm-label">Est. delivery</span><span>5–7 business days</span></div>
+    <div class="eyebrow" style="margin-bottom:10px">Order confirmed</div>
+    <div class="confirm-title">Your pulls are on their way.</div>
+    <p class="confirm-sub">Packed by hand. Shipped with care. Good luck on your pulls — may the RNG be with you.</p>
+    <div class="sticker-card confirm-card">
+      <div class="confirm-row"><span class="confirm-row-label">Order number</span><span class="confirm-row-val" id="confirmNum" style="color:var(--color-primary)"></span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Status</span><span class="confirm-row-val" style="color:var(--color-success)">Confirmed</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Est. delivery</span><span class="confirm-row-val">5 – 7 business days</span></div>
     </div>
-    <p class="confirm-note">This is a demo store. No real payment was processed.</p>
+    <p class="confirm-note">Demo store — no real payment was processed.</p>
     <div class="confirm-btns">
-      <button class="btn-dark" onclick="navigate('browse')">Continue Shopping</button>
-      <button class="btn-outline" onclick="navigate('home')">Back to Home</button>
+      <button class="btn-primary" onclick="navigate('browse')">Keep hunting →</button>
+      <button class="btn-outline" onclick="navigate('home')">Back to home</button>
     </div>
   </div>
 </div>
 
 </main>
 
+<!-- FOOTER -->
 <footer>
-  <div class="footer-inner">
-    <div><p style="font-size:.875rem;font-weight:600">TCG Shop</p><p style="font-size:.75rem;color:#6b7280;margin-top:4px">Your source for trading card games.</p></div>
-    <div style="display:flex;gap:1.5rem">
-      <a onclick="navigate('home')" style="font-size:.75rem;color:#6b7280">Home</a>
-      <a onclick="navigate('browse')" style="font-size:.75rem;color:#6b7280">Browse</a>
-      <a onclick="navigate('cart')" style="font-size:.75rem;color:#6b7280">Cart</a>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">R&amp;G TCG</div>
+      <p class="footer-tagline">Sealed product, hand-checked. Booster boxes and packs across the five major games — picked, packed, and shipped the same day.</p>
+      <div class="footer-chips" style="margin-top:16px">
+        <span class="chip" style="font-size:10px;color:var(--color-text-muted)">Pokémon</span>
+        <span class="chip" style="font-size:10px;color:var(--color-text-muted)">Magic</span>
+        <span class="chip" style="font-size:10px;color:var(--color-text-muted)">Yu-Gi-Oh!</span>
+        <span class="chip" style="font-size:10px;color:var(--color-text-muted)">Lorcana</span>
+        <span class="chip" style="font-size:10px;color:var(--color-text-muted)">One Piece</span>
+      </div>
+    </div>
+    <div class="footer-col">
+      <span class="eyebrow footer-col-head">Shop</span>
+      <ul>
+        <li><a onclick="navigate('browse')">Browse all</a></li>
+        <li><a onclick="navigate('browse')">Booster boxes</a></li>
+        <li><a onclick="navigate('browse')">Booster packs</a></li>
+        <li><a onclick="navigate('cart')">Your bag</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <span class="eyebrow footer-col-head">Games</span>
+      <ul>
+        <li><a onclick="navigate('browse','pokemon')">Pokémon</a></li>
+        <li><a onclick="navigate('browse','mtg')">Magic: The Gathering</a></li>
+        <li><a onclick="navigate('browse','yugioh')">Yu-Gi-Oh!</a></li>
+      </ul>
     </div>
   </div>
-  <p class="footer-copy">© 2026 TCG Shop. All rights reserved. Demo store — no real transactions.</p>
+  <div class="footer-bar">
+    <div class="footer-bar-inner">
+      <p>© 2026 R&amp;G TCG — Demo store, no real transactions.</p>
+      <p>White + Purple "Gear 5"</p>
+    </div>
+  </div>
 </footer>
 
 <div id="toast"></div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
-const PRODUCTS = [
-  {id:'poke-sv-base-en',name:'Pokémon Scarlet & Violet Base Set Booster Box',tcg:'pokemon',language:'english',type:'booster-box',price:144.99,stock:15,description:'The Scarlet & Violet Base Set introduces Pokémon ex cards with stunning artwork. Each booster box contains 36 packs, with 10 cards per pack. Features over 190 cards including powerful Pokémon ex and full-art illustrations.',imageUrl:'https://placehold.co/300x400/fef9c3/854d0e?text=Pokemon+SV+Box+EN',featured:true},
-  {id:'poke-sv-base-jp',name:'Pokémon Scarlet & Violet Base Set Booster Box',tcg:'pokemon',language:'japanese',type:'booster-box',price:89.99,stock:20,description:'Japanese edition of the Scarlet & Violet Base Set. 30 packs per box with 7 cards each. Japanese cards often feature different artwork and card numbering, making them highly sought after by collectors.',imageUrl:'https://placehold.co/300x400/fef9c3/854d0e?text=Pokemon+SV+Box+JP',featured:true},
-  {id:'ygo-phantom-nightmare-en',name:'Yu-Gi-Oh! Phantom Nightmare Booster Box',tcg:'yugioh',language:'english',type:'booster-box',price:79.99,stock:10,description:'Phantom Nightmare brings new support for popular archetypes. Each booster box contains 24 packs with 9 cards each. Includes Ultra Rares, Super Rares, and rare Secret Rare pulls.',imageUrl:'https://placehold.co/300x400/ede9fe/4c1d95?text=YGO+Phantom+Box+EN',featured:true},
-  {id:'ygo-phantom-nightmare-jp',name:'Yu-Gi-Oh! Phantom Nightmare Booster Box',tcg:'yugioh',language:'japanese',type:'booster-box',price:64.99,stock:8,description:'Japanese Phantom Nightmare booster box. Japanese Yu-Gi-Oh sets often release months before the international version. 30 packs per box, 7 cards per pack. Chance at quarter-century secret rares.',imageUrl:'https://placehold.co/300x400/ede9fe/4c1d95?text=YGO+Phantom+Box+JP',featured:false},
-  {id:'mtg-karlov-manor-en',name:'MTG Murders at Karlov Manor Draft Booster Box',tcg:'mtg',language:'english',type:'booster-box',price:109.99,stock:12,description:'Solve the mystery in Ravnica with the Murders at Karlov Manor Draft Booster Box. Contains 36 packs, each with 15 cards optimized for draft play. Features the new "Disguise" and "Cloak" mechanics.',imageUrl:'https://placehold.co/300x400/dcfce7/14532d?text=MTG+Karlov+Box+EN',featured:true},
-  {id:'mtg-karlov-manor-jp',name:'MTG Murders at Karlov Manor Draft Booster Box',tcg:'mtg',language:'japanese',type:'booster-box',price:84.99,stock:7,description:'Japanese edition of the Murders at Karlov Manor Draft Booster Box. 36 packs per box with full Japanese card text and distinct foil treatments. Popular with collectors who prefer the Japanese typography.',imageUrl:'https://placehold.co/300x400/dcfce7/14532d?text=MTG+Karlov+Box+JP',featured:false},
-  {id:'poke-twilight-masquerade-en',name:'Pokémon Twilight Masquerade Booster Pack',tcg:'pokemon',language:'english',type:'booster-pack',price:4.99,stock:100,description:'Single booster pack from the Twilight Masquerade set. Contains 10 cards with a chance to pull ex Pokémon, full-art trainers, and hyper rares. Features Ogerpon and other Kitakami Pokémon.',imageUrl:'https://placehold.co/300x400/fef9c3/854d0e?text=Pokemon+TM+Pack+EN',featured:false},
-  {id:'poke-twilight-masquerade-jp',name:'Pokémon Twilight Masquerade Booster Pack',tcg:'pokemon',language:'japanese',type:'booster-pack',price:3.49,stock:150,description:'Japanese single booster pack from the Twilight Masquerade set. 7 cards per pack with higher pull rates for rare cards compared to the English version.',imageUrl:'https://placehold.co/300x400/fef9c3/854d0e?text=Pokemon+TM+Pack+JP',featured:false},
-  {id:'ygo-legacy-destruction-en',name:'Yu-Gi-Oh! Legacy of Destruction Booster Pack',tcg:'yugioh',language:'english',type:'booster-pack',price:3.99,stock:80,description:'Single pack from the Legacy of Destruction set. 9 cards per pack with new support for Dragon, Fiend, and Warrior archetypes. Chance at Ultra Rares and Secret Rares.',imageUrl:'https://placehold.co/300x400/ede9fe/4c1d95?text=YGO+LEDE+Pack+EN',featured:false},
-  {id:'ygo-legacy-destruction-jp',name:'Yu-Gi-Oh! Legacy of Destruction Booster Pack',tcg:'yugioh',language:'japanese',type:'booster-pack',price:3.49,stock:90,description:'Japanese single booster pack from Legacy of Destruction. 7 cards per pack. Japanese packs are pristine, making them popular with collectors chasing quarter-century secret rares.',imageUrl:'https://placehold.co/300x400/ede9fe/4c1d95?text=YGO+LEDE+Pack+JP',featured:false},
-  {id:'mtg-thunder-junction-pack-en',name:'MTG Outlaws of Thunder Junction Play Booster Pack',tcg:'mtg',language:'english',type:'booster-pack',price:4.99,stock:120,description:'Single Play Booster Pack from Outlaws of Thunder Junction. 14 cards per pack. Guaranteed rare or mythic rare, plus a chance at The Big Score bonus cards.',imageUrl:'https://placehold.co/300x400/dcfce7/14532d?text=MTG+OTJ+Pack+EN',featured:false},
-  {id:'mtg-thunder-junction-pack-jp',name:'MTG Outlaws of Thunder Junction Play Booster Pack',tcg:'mtg',language:'japanese',type:'booster-pack',price:3.99,stock:60,description:'Japanese edition Play Booster Pack from Outlaws of Thunder Junction. Features Japanese card art and text. Popular with collectors who appreciate the distinct Japanese card frame.',imageUrl:'https://placehold.co/300x400/dcfce7/14532d?text=MTG+OTJ+Pack+JP',featured:false},
+const TCG_COLORS={pokemon:'#6b3bd6',yugioh:'#a07cff',mtg:'#3f6df0'};
+const TCG_LABELS={pokemon:'Pokémon',yugioh:'Yu-Gi-Oh!',mtg:'Magic'};
+const TYPE_LABELS={'booster-box':'Booster Box','booster-pack':'Booster Pack','single-card':'Single Card','sealed-product':'Sealed Product'};
+
+const PRODUCTS=[
+  {id:'poke-sv-base-en',name:'Pokémon Scarlet & Violet Base Set Booster Box',tcg:'pokemon',language:'english',type:'booster-box',price:144.99,stock:15,description:'The Scarlet & Violet Base Set introduces Pokémon ex cards. Each booster box contains 36 packs with 10 cards per pack. Features over 190 cards including powerful Pokémon ex and full-art illustrations.',imageUrl:'https://placehold.co/300x400/ede7fb/6b3bd6?text=Pokemon+SV+EN',featured:true},
+  {id:'poke-sv-base-jp',name:'Pokémon Scarlet & Violet Base Set Booster Box',tcg:'pokemon',language:'japanese',type:'booster-box',price:89.99,stock:20,description:'Japanese edition of the Scarlet & Violet Base Set. 30 packs per box with 7 cards each. Highly sought after by collectors worldwide.',imageUrl:'https://placehold.co/300x400/ede7fb/6b3bd6?text=Pokemon+SV+JP',featured:true},
+  {id:'ygo-phantom-nightmare-en',name:'Yu-Gi-Oh! Phantom Nightmare Booster Box',tcg:'yugioh',language:'english',type:'booster-box',price:79.99,stock:10,description:'Phantom Nightmare brings new support for popular archetypes. 24 packs per box with 9 cards each. Includes Ultra Rares and Secret Rares.',imageUrl:'https://placehold.co/300x400/f3f0ff/a07cff?text=YGO+Phantom+EN',featured:true},
+  {id:'ygo-phantom-nightmare-jp',name:'Yu-Gi-Oh! Phantom Nightmare Booster Box',tcg:'yugioh',language:'japanese',type:'booster-box',price:64.99,stock:8,description:'Japanese Phantom Nightmare booster box. 30 packs per box, 7 cards per pack. Chance at quarter-century secret rares.',imageUrl:'https://placehold.co/300x400/f3f0ff/a07cff?text=YGO+Phantom+JP',featured:false},
+  {id:'mtg-karlov-manor-en',name:'MTG Murders at Karlov Manor Draft Booster Box',tcg:'mtg',language:'english',type:'booster-box',price:109.99,stock:12,description:'Solve the mystery in Ravnica. 36 packs per box with 15 cards optimized for draft play. Features the new "Disguise" and "Cloak" mechanics.',imageUrl:'https://placehold.co/300x400/eff4ff/3f6df0?text=MTG+Karlov+EN',featured:true},
+  {id:'mtg-karlov-manor-jp',name:'MTG Murders at Karlov Manor Draft Booster Box',tcg:'mtg',language:'japanese',type:'booster-box',price:84.99,stock:7,description:'Japanese edition of Murders at Karlov Manor. 36 packs with full Japanese card text and distinct foil treatments.',imageUrl:'https://placehold.co/300x400/eff4ff/3f6df0?text=MTG+Karlov+JP',featured:false},
+  {id:'poke-twilight-masquerade-en',name:'Pokémon Twilight Masquerade Booster Pack',tcg:'pokemon',language:'english',type:'booster-pack',price:4.99,stock:100,description:'Single booster pack from Twilight Masquerade. 10 cards with a chance to pull ex Pokémon, full-art trainers, and hyper rares.',imageUrl:'https://placehold.co/300x400/ede7fb/6b3bd6?text=TM+Pack+EN',featured:false},
+  {id:'poke-twilight-masquerade-jp',name:'Pokémon Twilight Masquerade Booster Pack',tcg:'pokemon',language:'japanese',type:'booster-pack',price:3.49,stock:150,description:'Japanese single booster pack. 7 cards per pack with higher pull rates for rare cards compared to the English version.',imageUrl:'https://placehold.co/300x400/ede7fb/6b3bd6?text=TM+Pack+JP',featured:false},
+  {id:'ygo-legacy-destruction-en',name:'Yu-Gi-Oh! Legacy of Destruction Booster Pack',tcg:'yugioh',language:'english',type:'booster-pack',price:3.99,stock:80,description:'Single pack from Legacy of Destruction. 9 cards per pack with new support for Dragon, Fiend, and Warrior archetypes.',imageUrl:'https://placehold.co/300x400/f3f0ff/a07cff?text=LEDE+Pack+EN',featured:false},
+  {id:'ygo-legacy-destruction-jp',name:'Yu-Gi-Oh! Legacy of Destruction Booster Pack',tcg:'yugioh',language:'japanese',type:'booster-pack',price:3.49,stock:90,description:'Japanese single booster pack from Legacy of Destruction. Pristine packaging, popular with collectors.',imageUrl:'https://placehold.co/300x400/f3f0ff/a07cff?text=LEDE+Pack+JP',featured:false},
+  {id:'mtg-thunder-junction-pack-en',name:'MTG Outlaws of Thunder Junction Play Booster Pack',tcg:'mtg',language:'english',type:'booster-pack',price:4.99,stock:120,description:'Single Play Booster Pack from Outlaws of Thunder Junction. 14 cards, guaranteed rare or mythic rare.',imageUrl:'https://placehold.co/300x400/eff4ff/3f6df0?text=OTJ+Pack+EN',featured:false},
+  {id:'mtg-thunder-junction-pack-jp',name:'MTG Outlaws of Thunder Junction Play Booster Pack',tcg:'mtg',language:'japanese',type:'booster-pack',price:3.99,stock:60,description:'Japanese Play Booster Pack from Outlaws of Thunder Junction. Distinct Japanese art and typography.',imageUrl:'https://placehold.co/300x400/eff4ff/3f6df0?text=OTJ+Pack+JP',featured:false},
 ];
 
-const TCG_LABELS = {pokemon:'Pokémon',yugioh:'Yu-Gi-Oh!',mtg:'Magic: The Gathering'};
-const TYPE_LABELS = {'booster-box':'Booster Box','booster-pack':'Booster Pack','single-card':'Single Card','sealed-product':'Sealed Product'};
-
-// ─── CART ────────────────────────────────────────────────────────────────────
-let cart = JSON.parse(localStorage.getItem('tcg-demo-cart')||'[]');
-
-function saveCart(){localStorage.setItem('tcg-demo-cart',JSON.stringify(cart));}
+// ── Cart ──────────────────────────────────────────────────────────────
+let cart=JSON.parse(localStorage.getItem('rg-tcg-cart')||'[]');
+function saveCart(){localStorage.setItem('rg-tcg-cart',JSON.stringify(cart));}
 function cartTotal(){return cart.reduce((s,i)=>{const p=PRODUCTS.find(x=>x.id===i.id);return s+(p?p.price*i.qty:0);},0);}
-function cartItemCount(){return cart.reduce((s,i)=>s+i.qty,0);}
-
-function updateBadge(){
-  const n=cartItemCount();
-  const b=document.getElementById('cartBadge');
-  const m=document.getElementById('mobileCartCount');
-  if(n>0){b.style.display='flex';b.textContent=n>99?'99+':n;}
-  else{b.style.display='none';}
-  if(m) m.textContent=n>0?`(${n})`:'';
-}
-
+function cartCount(){return cart.reduce((s,i)=>s+i.qty,0);}
 function addToCart(id,maxStock){
-  const existing=cart.find(i=>i.id===id);
-  if(existing){
-    if(existing.qty<maxStock) existing.qty++;
-    else{toast('Max stock reached');return;}
-  } else {
-    cart.push({id,qty:1});
-  }
-  saveCart();updateBadge();
-  toast('Added to cart ✓');
+  const ex=cart.find(i=>i.id===id);
+  if(ex){if(ex.qty>=maxStock){toast('Max stock reached');return;}ex.qty++;}
+  else cart.push({id,qty:1});
+  saveCart();updateBadge();toast('Added to bag ✓');
 }
-
 function removeFromCart(id){cart=cart.filter(i=>i.id!==id);saveCart();updateBadge();renderCart();}
-
-function updateQty(id,delta){
-  const item=cart.find(i=>i.id===id);
-  const p=PRODUCTS.find(x=>x.id===id);
-  if(!item||!p) return;
-  const newQty=item.qty+delta;
-  if(newQty<=0){removeFromCart(id);return;}
-  if(newQty>p.stock){toast('Max stock reached');return;}
-  item.qty=newQty;
-  saveCart();updateBadge();renderCart();
+function updateQty(id,d){
+  const item=cart.find(i=>i.id===id),p=PRODUCTS.find(x=>x.id===id);
+  if(!item||!p)return;
+  const nq=item.qty+d;
+  if(nq<=0){removeFromCart(id);return;}
+  if(nq>p.stock){toast('Max stock reached');return;}
+  item.qty=nq;saveCart();updateBadge();renderCart();
+}
+function updateBadge(){
+  const n=cartCount();
+  const b=document.getElementById('navBadge');
+  const m=document.getElementById('mobileBadge');
+  if(n>0){b.style.display='flex';b.textContent=n>99?'99+':n;}
+  else b.style.display='none';
+  if(m)m.textContent=n>0?`(${n})`:'';
 }
 
-// ─── TOAST ───────────────────────────────────────────────────────────────────
-let toastTimer;
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+// ── Drag & Drop ───────────────────────────────────────────────────────
+let dragId=null,dragMax=0;
+function bagDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='copy';document.getElementById('navBag').classList.add('drag-over');document.getElementById('dragHint').style.display='block';}
+function bagDragLeave(){document.getElementById('navBag').classList.remove('drag-over');document.getElementById('dragHint').style.display='none';}
+function bagDrop(e){
+  e.preventDefault();
+  document.getElementById('navBag').classList.remove('drag-over');
+  document.getElementById('dragHint').style.display='none';
+  const id=e.dataTransfer.getData('productId')||dragId;
+  const max=parseInt(e.dataTransfer.getData('maxStock')||dragMax||99,10);
+  if(id)addToCart(id,max);
+  document.querySelectorAll('.pcard,.detail-img').forEach(el=>{el.classList.remove('dragging');el.style.opacity='';});
+  document.getElementById('navBag').classList.remove('drag-active');
+}
+function detailDragStart(e){
+  const id=currentProductId;const p=PRODUCTS.find(x=>x.id===id);if(!p)return;
+  e.dataTransfer.setData('productId',id);e.dataTransfer.setData('maxStock',p.stock);
+  dragId=id;dragMax=p.stock;
+  document.getElementById('navBag').classList.add('drag-active');
+  document.getElementById('dragHint').style.display='block';
+}
+function detailDragEnd(){
+  document.getElementById('navBag').classList.remove('drag-active');
+  document.getElementById('dragHint').style.display='none';
 }
 
-// ─── NAVIGATION ──────────────────────────────────────────────────────────────
-let currentPage='home';
-let currentProductId=null;
+// ── Toast ──────────────────────────────────────────────────────────────
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2000);}
 
+// ── Nav ────────────────────────────────────────────────────────────────
+function toggleMenu(){const m=document.getElementById('mobileMenu');m.style.display=m.style.display==='block'?'none':'block';}
+function closeMenu(){document.getElementById('mobileMenu').style.display='none';}
+
+// ── Navigation ─────────────────────────────────────────────────────────
+let currentPage='home',currentProductId=null;
 function navigate(page,arg){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  if(page==='product'&&arg){
-    currentProductId=arg;
-    renderProductDetail(arg);
-  }
-  if(page==='browse'){
-    renderBrowse();
-    if(arg) setTcgFilter(arg);
-  }
-  if(page==='cart') renderCart();
-  if(page==='checkout') renderCheckout();
+  if(page==='product'&&arg){currentProductId=arg;renderDetail(arg);}
+  if(page==='browse'){renderBrowse();if(arg)setTcg(arg);}
+  if(page==='cart')renderCart();
+  if(page==='checkout')renderCheckout();
   currentPage=page;
-  const el=document.getElementById(`page-${page}`);
-  if(el) el.classList.add('active');
+  document.getElementById(`page-${page}`).classList.add('active');
   window.scrollTo(0,0);
 }
 
-// ─── NAVBAR ──────────────────────────────────────────────────────────────────
-function toggleMenu(){
-  const m=document.getElementById('mobileMenu');
-  const open=m.style.display==='block';
-  m.style.display=open?'none':'block';
-}
-function closeMenu(){document.getElementById('mobileMenu').style.display='none';}
-
-// ─── CARD HTML ───────────────────────────────────────────────────────────────
+// ── Card HTML ──────────────────────────────────────────────────────────
 function cardHTML(p){
-  return `<div class="card">
-    <img src="${p.imageUrl}" alt="${p.name}" loading="lazy" onclick="navigate('product','${p.id}')" style="cursor:pointer"/>
-    <div class="card-body">
-      <div class="card-meta"><span>${TCG_LABELS[p.tcg]}</span><span>·</span><span>${p.language}</span></div>
-      <p class="card-title" style="cursor:pointer" onclick="navigate('product','${p.id}')">${p.name}</p>
-      <div class="card-footer">
-        <span class="card-price">$${p.price.toFixed(2)}</span>
-        <span class="card-stock ${p.stock>0?'stock-ok':'stock-no'}">${p.stock>0?`${p.stock} in stock`:'Out of stock'}</span>
+  return `<div class="pcard" draggable="${p.stock>0}"
+    ondragstart="cardDragStart(event,'${p.id}',${p.stock})"
+    ondragend="cardDragEnd(event)">
+    <div class="pcard-img" onclick="navigate('product','${p.id}')"><img src="${p.imageUrl}" alt="${p.name}" loading="lazy"/></div>
+    <div class="pcard-body">
+      <div class="pcard-chips">
+        <span class="pcard-chip" style="color:${TCG_COLORS[p.tcg]}">${TCG_LABELS[p.tcg]}</span>
+        <span class="pcard-lang">${p.language}</span>
       </div>
-      <button class="card-btn" ${p.stock===0?'disabled':''} onclick="addToCart('${p.id}',${p.stock})">${p.stock===0?'Out of Stock':'Add to Cart'}</button>
+      <div class="pcard-name" onclick="navigate('product','${p.id}')">${p.name}</div>
+      <div class="pcard-row">
+        <span class="pcard-price">$${p.price.toFixed(2)}</span>
+        <span class="${p.stock>0?'pcard-stock-ok':'pcard-stock-no'}">${p.stock>0?`${p.stock} left`:'SOLD OUT'}</span>
+      </div>
+      <button class="btn-primary pcard-cta" style="width:100%;font-size:13px" ${p.stock===0?'disabled':''} onclick="addToCart('${p.id}',${p.stock})">
+        ${p.stock===0?'Sold out':'Add to bag'}
+      </button>
+      ${p.stock>0?'<div class="drag-note">or drag to bag ↑</div>':''}
     </div>
   </div>`;
 }
-
-// ─── HOME ────────────────────────────────────────────────────────────────────
-function renderHome(){
-  const featured=PRODUCTS.filter(p=>p.featured);
-  document.getElementById('featuredGrid').innerHTML=featured.map(cardHTML).join('');
+function cardDragStart(e,id,max){
+  e.dataTransfer.setData('productId',id);e.dataTransfer.setData('maxStock',max);
+  dragId=id;dragMax=max;
+  e.currentTarget.classList.add('dragging');
+  document.getElementById('navBag').classList.add('drag-active');
+  document.getElementById('dragHint').style.display='block';
+}
+function cardDragEnd(e){
+  e.currentTarget.classList.remove('dragging');
+  e.currentTarget.style.opacity='';
+  document.getElementById('navBag').classList.remove('drag-active');
+  document.getElementById('dragHint').style.display='none';
 }
 
-// ─── BROWSE ──────────────────────────────────────────────────────────────────
-let activeTcg='all', activeLang='all';
+// ── Home ───────────────────────────────────────────────────────────────
+document.getElementById('featuredGrid').innerHTML=PRODUCTS.filter(p=>p.featured).map(cardHTML).join('');
 
+// ── Browse ─────────────────────────────────────────────────────────────
+let activeTcg='all',activeLang='all';
 function renderBrowse(){
-  const filtered=PRODUCTS.filter(p=>{
-    return (activeTcg==='all'||p.tcg===activeTcg)&&(activeLang==='all'||p.language===activeLang);
-  });
-  document.getElementById('resultsCount').textContent=`${filtered.length} ${filtered.length===1?'product':'products'}`;
-  document.getElementById('browseGrid').innerHTML=filtered.map(cardHTML).join('');
-  document.getElementById('noResults').style.display=filtered.length===0?'block':'none';
-  document.getElementById('browseGrid').style.display=filtered.length===0?'none':'grid';
+  const f=PRODUCTS.filter(p=>(activeTcg==='all'||p.tcg===activeTcg)&&(activeLang==='all'||p.language===activeLang));
+  document.getElementById('resultsCount').innerHTML=`<b>${f.length}</b> ${f.length===1?'product':'products'} found`;
+  document.getElementById('browseGrid').innerHTML=f.map(cardHTML).join('');
+  document.getElementById('noResults').style.display=f.length===0?'block':'none';
+  document.getElementById('browseGrid').style.display=f.length===0?'none':'grid';
 }
+function setTcg(v){activeTcg=v;document.querySelectorAll('#tcgFilters .fbtn').forEach(b=>b.classList.toggle('active',b.dataset.tcg===v));renderBrowse();}
+function setLang(v){activeLang=v;document.querySelectorAll('#langFilters .fbtn').forEach(b=>b.classList.toggle('active',b.dataset.lang===v));renderBrowse();}
+function resetFilters(){activeTcg='all';activeLang='all';setTcg('all');setLang('all');}
+document.querySelectorAll('#tcgFilters .fbtn').forEach(b=>b.addEventListener('click',()=>setTcg(b.dataset.tcg)));
+document.querySelectorAll('#langFilters .fbtn').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
+renderBrowse();
 
-function setTcgFilter(val){
-  activeTcg=val;
-  document.querySelectorAll('#tcgFilters .fbtn').forEach(b=>{
-    b.classList.toggle('active',b.dataset.tcg===val);
-  });
-  renderBrowse();
-}
-
-function setLangFilter(val){
-  activeLang=val;
-  document.querySelectorAll('#langFilters .fbtn').forEach(b=>{
-    b.classList.toggle('active',b.dataset.lang===val);
-  });
-  renderBrowse();
-}
-
-function resetFilters(){activeTcg='all';activeLang='all';setTcgFilter('all');setLangFilter('all');}
-
-document.querySelectorAll('#tcgFilters .fbtn').forEach(b=>b.addEventListener('click',()=>setTcgFilter(b.dataset.tcg)));
-document.querySelectorAll('#langFilters .fbtn').forEach(b=>b.addEventListener('click',()=>setLangFilter(b.dataset.lang)));
-
-// ─── PRODUCT DETAIL ──────────────────────────────────────────────────────────
-function renderProductDetail(id){
-  const p=PRODUCTS.find(x=>x.id===id);
-  if(!p) return;
+// ── Detail ─────────────────────────────────────────────────────────────
+function renderDetail(id){
+  const p=PRODUCTS.find(x=>x.id===id);if(!p)return;
   document.getElementById('detailBreadcrumb').textContent=p.name;
   document.getElementById('detailImg').src=p.imageUrl;
   document.getElementById('detailImg').alt=p.name;
-  document.getElementById('detailMeta').innerHTML=`<span>${TCG_LABELS[p.tcg]}</span><span>·</span><span>${p.language}</span><span>·</span><span>${TYPE_LABELS[p.type]||p.type}</span>`;
+  document.getElementById('detailImgWrap').draggable=p.stock>0;
+  document.getElementById('detailChips').innerHTML=
+    `<span class="chip" style="font-size:11px;color:${TCG_COLORS[p.tcg]}">${TCG_LABELS[p.tcg]}</span>
+     <span class="chip" style="font-size:11px;color:var(--color-text-muted);text-transform:capitalize">${p.language}</span>
+     <span class="chip" style="font-size:11px;color:var(--color-text-muted)">${TYPE_LABELS[p.type]||p.type}</span>`;
   document.getElementById('detailTitle').textContent=p.name;
   document.getElementById('detailPrice').textContent=`$${p.price.toFixed(2)}`;
-  const stockEl=document.getElementById('detailStock');
-  stockEl.textContent=p.stock>0?`${p.stock} in stock`:'Out of stock';
-  stockEl.style.color=p.stock>0?'#16a34a':'#dc2626';
+  const st=document.getElementById('detailStock');
+  st.className=p.stock>0?'detail-stock-ok':'detail-stock-no';
+  st.textContent=p.stock>0?`${p.stock} in stock`:'SOLD OUT';
   document.getElementById('detailDesc').textContent=p.description;
-  const addBtn=document.getElementById('detailAddBtn');
-  addBtn.disabled=p.stock===0;
-  addBtn.textContent=p.stock===0?'Out of Stock':'Add to Cart';
+  const btn=document.getElementById('detailAddBtn');
+  btn.disabled=p.stock===0;btn.textContent=p.stock===0?'Sold out':'Add to bag';
+  const ci=cart.find(i=>i.id===p.id);
+  const vb=document.getElementById('detailViewBag');
+  vb.style.display=ci?'flex':'none';
+  if(ci)vb.textContent=`View bag (${ci.qty})`;
   document.getElementById('detailSpecs').innerHTML=
-    `<div class="spec-row"><span class="spec-label">Game</span><span>${TCG_LABELS[p.tcg]}</span></div>`+
-    `<div class="spec-row"><span class="spec-label">Language</span><span>${p.language.charAt(0).toUpperCase()+p.language.slice(1)}</span></div>`+
-    `<div class="spec-row"><span class="spec-label">Type</span><span>${TYPE_LABELS[p.type]||p.type}</span></div>`;
-  const cartItem=cart.find(i=>i.id===p.id);
-  const vcBtn=document.getElementById('detailViewCartBtn');
-  vcBtn.style.display=cartItem?'block':'none';
-  vcBtn.textContent=cartItem?`View Cart (${cartItem.qty} in cart)`:'View Cart';
-  // Related
+    `<div class="spec-row"><span class="spec-label">Game</span><span style="font-weight:600">${TCG_LABELS[p.tcg]}</span></div>
+     <div class="spec-row"><span class="spec-label">Language</span><span style="font-weight:600;text-transform:capitalize">${p.language}</span></div>
+     <div class="spec-row"><span class="spec-label">Type</span><span style="font-weight:600">${TYPE_LABELS[p.type]||p.type}</span></div>`;
   const related=PRODUCTS.filter(x=>x.tcg===p.tcg&&x.id!==p.id).slice(0,4);
-  document.getElementById('relatedTitle').textContent=`More ${TCG_LABELS[p.tcg]} Products`;
+  document.getElementById('relatedTitle').textContent=`More ${TCG_LABELS[p.tcg]} product`;
   document.getElementById('relatedGrid').innerHTML=related.map(cardHTML).join('');
   document.getElementById('relatedSection').style.display=related.length?'block':'none';
 }
-
-function detailAddToCart(){
-  if(!currentProductId) return;
-  const p=PRODUCTS.find(x=>x.id===currentProductId);
-  if(!p) return;
+function detailAdd(){
+  const p=PRODUCTS.find(x=>x.id===currentProductId);if(!p)return;
   addToCart(p.id,p.stock);
-  const vcBtn=document.getElementById('detailViewCartBtn');
-  const item=cart.find(i=>i.id===p.id);
-  vcBtn.style.display='block';
-  vcBtn.textContent=`View Cart (${item?item.qty:1} in cart)`;
+  const ci=cart.find(i=>i.id===p.id);
+  const vb=document.getElementById('detailViewBag');
+  vb.style.display='flex';vb.textContent=`View bag (${ci?ci.qty:1})`;
 }
 
-// ─── CART ────────────────────────────────────────────────────────────────────
+// ── Cart ───────────────────────────────────────────────────────────────
 function renderCart(){
   const el=document.getElementById('cartContent');
   if(cart.length===0){
     el.innerHTML=`<div class="empty-state">
-      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-      <h1>Your cart is empty</h1>
-      <p>Add some products to get started.</p>
-      <button class="btn-dark" onclick="navigate('browse')">Browse Products</button>
+      <div class="empty-bag-icon">
+        <svg width="40" height="40" fill="none" stroke="#6b3bd6" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+      </div>
+      <h1>Your bag is empty</h1>
+      <p>Drag a product into the bag or hit <em>Add to bag</em> on any card.</p>
+      <button class="btn-primary" style="margin-top:24px" onclick="navigate('browse')">Start hunting →</button>
     </div>`;
     return;
   }
   const total=cartTotal();
-  let itemsHTML=cart.map(item=>{
-    const p=PRODUCTS.find(x=>x.id===item.id);
-    if(!p) return '';
-    return `<div class="cart-item">
+  let html=`<div class="eyebrow" style="margin-bottom:8px">Your haul</div>
+    <h1 style="font-family:var(--font-display);font-size:36px;margin-bottom:28px">Shopping bag</h1>`;
+  cart.forEach(item=>{
+    const p=PRODUCTS.find(x=>x.id===item.id);if(!p)return;
+    html+=`<div class="sticker-card cart-item" style="padding:16px">
       <img src="${p.imageUrl}" alt="${p.name}" onclick="navigate('product','${p.id}')" style="cursor:pointer"/>
       <div class="cart-item-body">
-        <p class="cart-item-name" onclick="navigate('product','${p.id}')" style="cursor:pointer">${p.name}</p>
-        <p class="cart-item-lang">${p.language}</p>
-        <p class="cart-item-price">$${p.price.toFixed(2)}</p>
+        <div class="cart-item-name" onclick="navigate('product','${p.id}')">${p.name}</div>
+        <div class="cart-item-lang">${p.language}</div>
+        <div class="cart-item-price">$${p.price.toFixed(2)}</div>
         <div class="qty-controls">
           <button class="qty-btn" onclick="updateQty('${p.id}',-1)">−</button>
           <span class="qty-val">${item.qty}</span>
@@ -604,63 +741,53 @@ function renderCart(){
         </div>
       </div>
       <div class="cart-item-right">
-        <button class="remove-btn" onclick="removeFromCart('${p.id}')" title="Remove">✕</button>
-        <span class="cart-line-total">$${(p.price*item.qty).toFixed(2)}</span>
+        <button class="remove-btn" onclick="removeFromCart('${p.id}')">✕</button>
+        <div class="cart-line-total">$${(p.price*item.qty).toFixed(2)}</div>
       </div>
     </div>`;
-  }).join('');
-  el.innerHTML=`${itemsHTML}
-    <div class="order-summary">
-      <div class="summary-row"><span>Subtotal</span><span>$${total.toFixed(2)}</span></div>
-      <div class="summary-row"><span>Shipping</span><span style="color:#6b7280">Calculated at checkout</span></div>
-      <div class="summary-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
-    </div>
+  });
+  html+=`<div class="sticker-card order-summary-card" style="margin-top:20px">
+    <div class="summary-row" style="padding:16px 20px 8px"><span>Subtotal</span><span style="font-weight:600;color:var(--color-ink)">$${total.toFixed(2)}</span></div>
+    <div class="summary-row" style="padding:0 20px 8px"><span>Shipping</span><span>Calculated at checkout</span></div>
+    <div class="summary-total">Total<span>$${total.toFixed(2)}</span></div>
     <div class="cart-actions">
-      <button class="btn-dark" onclick="navigate('checkout')">Proceed to Checkout</button>
-      <button class="btn-outline" onclick="navigate('browse')">Continue Shopping</button>
-    </div>`;
+      <button class="btn-primary" style="width:100%" onclick="navigate('checkout')">Go to checkout →</button>
+      <button class="btn-outline" style="width:100%" onclick="navigate('browse')">Keep hunting</button>
+    </div>
+  </div>`;
+  el.innerHTML=html;
 }
 
-// ─── CHECKOUT ────────────────────────────────────────────────────────────────
+// ── Checkout ───────────────────────────────────────────────────────────
 function renderCheckout(){
   if(cart.length===0){navigate('browse');return;}
   document.getElementById('checkoutForm').style.display='block';
   document.getElementById('processing').style.display='none';
   const total=cartTotal();
-  document.getElementById('placeOrderBtn').textContent=`Place Order — $${total.toFixed(2)}`;
+  document.getElementById('placeOrderBtn').textContent=`Confirm & pay — $${total.toFixed(2)}`;
   document.getElementById('coTotal').textContent=`$${total.toFixed(2)}`;
   document.getElementById('coItems').innerHTML=cart.map(item=>{
-    const p=PRODUCTS.find(x=>x.id===item.id);
-    if(!p) return '';
-    return `<div class="co-item">
+    const p=PRODUCTS.find(x=>x.id===item.id);if(!p)return'';
+    return`<div class="co-item">
       <img src="${p.imageUrl}" alt="${p.name}"/>
-      <div style="flex:1"><p class="co-item-name">${p.name}</p><p class="co-item-sub">${p.language} · qty ${item.qty}</p></div>
-      <span class="co-item-price">$${(p.price*item.qty).toFixed(2)}</span>
+      <div><div class="co-item-name">${p.name}</div><div class="co-item-sub">${p.language} · qty ${item.qty}</div></div>
+      <div class="co-item-price">$${(p.price*item.qty).toFixed(2)}</div>
     </div>`;
   }).join('');
 }
-
 function fmtCard(el){el.value=el.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();}
-
-function fmtExpiry(el){
-  const d=el.value.replace(/\D/g,'').slice(0,4);
-  el.value=d.length<=2?d:`${d.slice(0,2)}/${d.slice(2)}`;
-}
-
+function fmtExp(el){const d=el.value.replace(/\D/g,'').slice(0,4);el.value=d.length<=2?d:`${d.slice(0,2)}/${d.slice(2)}`;}
 async function submitOrder(e){
   e.preventDefault();
   document.getElementById('checkoutForm').style.display='none';
   document.getElementById('processing').style.display='block';
   await new Promise(r=>setTimeout(r,1200));
-  const orderNum=`TCG-${Date.now().toString().slice(-8)}`;
+  const num=`RG-${Date.now().toString().slice(-8)}`;
   cart=[];saveCart();updateBadge();
-  document.getElementById('confirmOrderNum').textContent=orderNum;
+  document.getElementById('confirmNum').textContent=num;
   navigate('confirm');
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-renderHome();
-renderBrowse();
 updateBadge();
 </script>
 </body>

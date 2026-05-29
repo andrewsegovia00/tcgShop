@@ -4,51 +4,53 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-function OrderConfirmationContent() {
+function ConfirmContent() {
   const searchParams = useSearchParams();
-  const orderNumber = searchParams.get('order') ?? 'TCG-XXXXXXXX';
+  const orderNumber = searchParams.get('order') ?? 'RG-XXXXXXXX';
 
   return (
-    <div className="max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-      <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-green-50 rounded-full border border-green-200">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    <div className="max-w-lg mx-auto px-5 py-20 text-center">
+      {/* Icon */}
+      <div className="w-20 h-20 mx-auto mb-6 rounded-lg border-2 border-ink bg-primary-tint flex items-center justify-center shadow-offset-md">
+        <svg className="w-10 h-10 text-success" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
         </svg>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900">Order Placed!</h1>
-      <p className="text-gray-500 mt-2 text-sm">Thank you for your purchase. Your order has been received.</p>
 
-      <div className="mt-6 border border-gray-200 rounded-lg p-6 text-left">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500">Order number</span>
-          <span className="text-sm font-mono font-semibold text-gray-900">{orderNumber}</span>
+      <p className="eyebrow mb-3">Order confirmed</p>
+      <h1 className="font-display text-display-lg text-ink leading-tight">
+        Your pulls are on their way.
+      </h1>
+      <p className="font-body text-body-sm text-muted mt-3 max-w-xs mx-auto leading-relaxed">
+        Packed by hand. Shipped with care. Good luck on your pulls — may the RNG be with you.
+      </p>
+
+      {/* Order card */}
+      <div className="sticker-card p-6 text-left mt-8">
+        <div className="flex justify-between items-center py-2 border-b border-border-soft">
+          <span className="font-mono text-label text-muted">Order number</span>
+          <span className="font-mono font-bold text-label text-primary">{orderNumber}</span>
         </div>
-        <div className="flex justify-between items-center mt-3">
-          <span className="text-sm text-gray-500">Status</span>
-          <span className="text-sm font-medium text-green-600">Confirmed</span>
+        <div className="flex justify-between items-center py-2 border-b border-border-soft">
+          <span className="font-mono text-label text-muted">Status</span>
+          <span className="font-mono font-bold text-label text-success">Confirmed</span>
         </div>
-        <div className="flex justify-between items-center mt-3">
-          <span className="text-sm text-gray-500">Estimated delivery</span>
-          <span className="text-sm text-gray-900">5–7 business days</span>
+        <div className="flex justify-between items-center py-2">
+          <span className="font-mono text-label text-muted">Est. delivery</span>
+          <span className="font-mono text-label text-ink">5 – 7 business days</span>
         </div>
       </div>
 
-      <p className="mt-6 text-xs text-gray-400">
-        This is a demo store. No real payment was processed.
+      <p className="font-mono text-label-sm text-muted mt-4">
+        Demo store — no real payment was processed.
       </p>
 
-      <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-        <Link
-          href="/browse"
-          className="inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700"
-        >
-          Continue Shopping
+      <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+        <Link href="/browse" className="btn-primary">
+          Keep hunting →
         </Link>
-        <Link
-          href="/"
-          className="inline-block px-6 py-3 border border-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-50"
-        >
-          Back to Home
+        <Link href="/" className="btn-outline">
+          Back to home
         </Link>
       </div>
     </div>
@@ -57,8 +59,8 @@ function OrderConfirmationContent() {
 
 export default function OrderConfirmationPage() {
   return (
-    <Suspense fallback={<div className="py-20 text-center text-gray-500 text-sm">Loading...</div>}>
-      <OrderConfirmationContent />
+    <Suspense fallback={<div className="py-20 text-center font-mono text-label text-muted">Loading…</div>}>
+      <ConfirmContent />
     </Suspense>
   );
 }

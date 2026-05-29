@@ -10,131 +10,123 @@ type TcgFilter = 'all' | Product['tcg'];
 type LangFilter = 'all' | Product['language'];
 
 const tcgOptions: { label: string; value: TcgFilter }[] = [
-  { label: 'All Games', value: 'all' },
+  { label: 'All games', value: 'all' },
   { label: 'Pokémon', value: 'pokemon' },
   { label: 'Yu-Gi-Oh!', value: 'yugioh' },
-  { label: 'Magic: The Gathering', value: 'mtg' },
+  { label: 'Magic', value: 'mtg' },
 ];
 
 const langOptions: { label: string; value: LangFilter }[] = [
-  { label: 'All Languages', value: 'all' },
+  { label: 'All languages', value: 'all' },
   { label: 'English', value: 'english' },
   { label: 'Japanese', value: 'japanese' },
 ];
 
+function FilterBtn({
+  active, label, onClick,
+}: { active: boolean; label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={[
+        'font-mono font-semibold text-label px-3 py-1.5 rounded-md border-2 transition-all duration-100',
+        active
+          ? 'bg-primary text-white border-ink shadow-offset-accent'
+          : 'bg-surface text-muted border-ink shadow-offset-sm hover:bg-surface-alt hover:shadow-offset-md hover:-translate-x-px hover:-translate-y-px',
+      ].join(' ')}
+    >
+      {label}
+    </button>
+  );
+}
+
 function BrowseContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-
   const [tcgFilter, setTcgFilter] = useState<TcgFilter>('all');
   const [langFilter, setLangFilter] = useState<LangFilter>('all');
 
   useEffect(() => {
-    const tcgParam = searchParams.get('tcg') as TcgFilter | null;
-    const langParam = searchParams.get('lang') as LangFilter | null;
-    if (tcgParam && ['pokemon', 'yugioh', 'mtg'].includes(tcgParam)) {
-      setTcgFilter(tcgParam);
-    }
-    if (langParam && ['english', 'japanese'].includes(langParam)) {
-      setLangFilter(langParam);
-    }
+    const t = searchParams.get('tcg') as TcgFilter | null;
+    const l = searchParams.get('lang') as LangFilter | null;
+    if (t && ['pokemon', 'yugioh', 'mtg'].includes(t)) setTcgFilter(t);
+    if (l && ['english', 'japanese'].includes(l)) setLangFilter(l);
   }, [searchParams]);
 
-  function handleTcgChange(value: TcgFilter) {
-    setTcgFilter(value);
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === 'all') params.delete('tcg');
-    else params.set('tcg', value);
-    router.replace(`/browse?${params.toString()}`, { scroll: false });
+  function updateParam(key: string, value: string) {
+    const p = new URLSearchParams(searchParams.toString());
+    if (value === 'all') p.delete(key);
+    else p.set(key, value);
+    router.replace(`/browse?${p.toString()}`, { scroll: false });
   }
 
-  function handleLangChange(value: LangFilter) {
-    setLangFilter(value);
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === 'all') params.delete('lang');
-    else params.set('lang', value);
-    router.replace(`/browse?${params.toString()}`, { scroll: false });
-  }
-
-  const filtered = products.filter((p) => {
-    const tcgMatch = tcgFilter === 'all' || p.tcg === tcgFilter;
-    const langMatch = langFilter === 'all' || p.language === langFilter;
-    return tcgMatch && langMatch;
-  });
+  const filtered = products.filter((p) =>
+    (tcgFilter === 'all' || p.tcg === tcgFilter) &&
+    (langFilter === 'all' || p.language === langFilter)
+  );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Browse Products</h1>
+    <div className="max-w-[1180px] mx-auto px-5 py-10">
+      {/* Header */}
+      <div className="mb-8">
+        <p className="eyebrow mb-2">R&amp;G TCG · All sealed product</p>
+        <h1 className="font-display text-display-lg text-ink">Find your next pull</h1>
+        <p className="font-body text-body-sm text-muted mt-1">
+          Drag any card into the bag, or tap <em>Add to bag</em>. Filters apply instantly.
+        </p>
+      </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-8 pb-6 border-b border-gray-200">
+      <div className="sticker-card p-5 mb-8 flex flex-col sm:flex-row gap-6 flex-wrap">
         <div>
-          <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-            Game
-          </label>
+          <p className="eyebrow mb-3">Game</p>
           <div className="flex flex-wrap gap-2">
-            {tcgOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => handleTcgChange(opt.value)}
-                className={`px-3 py-1.5 text-sm rounded border ${
-                  tcgFilter === opt.value
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'
-                }`}
-              >
-                {opt.label}
-              </button>
+            {tcgOptions.map((o) => (
+              <FilterBtn
+                key={o.value}
+                active={tcgFilter === o.value}
+                label={o.label}
+                onClick={() => { setTcgFilter(o.value); updateParam('tcg', o.value); }}
+              />
             ))}
           </div>
         </div>
+        <div className="w-px bg-border-soft hidden sm:block" />
         <div>
-          <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-            Language
-          </label>
+          <p className="eyebrow mb-3">Language</p>
           <div className="flex flex-wrap gap-2">
-            {langOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => handleLangChange(opt.value)}
-                className={`px-3 py-1.5 text-sm rounded border ${
-                  langFilter === opt.value
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'
-                }`}
-              >
-                {opt.label}
-              </button>
+            {langOptions.map((o) => (
+              <FilterBtn
+                key={o.value}
+                active={langFilter === o.value}
+                label={o.label}
+                onClick={() => { setLangFilter(o.value); updateParam('lang', o.value); }}
+              />
             ))}
           </div>
         </div>
       </div>
 
-      {/* Results count */}
-      <p className="text-sm text-gray-500 mb-5">
-        {filtered.length} {filtered.length === 1 ? 'product' : 'products'}
+      {/* Count */}
+      <p className="font-mono text-label text-muted mb-5">
+        <span className="font-bold text-ink">{filtered.length}</span>{' '}
+        {filtered.length === 1 ? 'product' : 'products'} found
       </p>
 
-      {/* Grid */}
+      {/* Grid or empty */}
       {filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-500">No products match your filters.</p>
+        <div className="text-center py-20">
+          <p className="font-body text-muted">Nothing matches those filters.</p>
           <button
-            onClick={() => {
-              setTcgFilter('all');
-              setLangFilter('all');
-              router.replace('/browse');
-            }}
-            className="mt-3 text-sm text-gray-900 underline"
+            onClick={() => { setTcgFilter('all'); setLangFilter('all'); router.replace('/browse'); }}
+            className="mt-3 font-mono text-label font-bold text-primary underline hover:text-primary-strong"
           >
             Clear filters
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filtered.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
       )}
     </div>
@@ -143,7 +135,11 @@ function BrowseContent() {
 
 export default function BrowsePage() {
   return (
-    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-10 text-sm text-gray-500">Loading...</div>}>
+    <Suspense fallback={
+      <div className="max-w-[1180px] mx-auto px-5 py-10 font-mono text-label text-muted">
+        Loading…
+      </div>
+    }>
       <BrowseContent />
     </Suspense>
   );
